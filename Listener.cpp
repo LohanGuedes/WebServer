@@ -16,3 +16,4 @@ Listener	&Listener::operator=(Listener const &rhs)
 {
 }
 
+int	Listener::getFd(void) { return(this->_fd); }

@@ -13,6 +13,8 @@ class ServerConfig
 
 		std::string		hostPort; // e.g: "localhost:4040"
 		std::string		serverName;
+	private:
+		int	_fd;
 };
 
 #endif
