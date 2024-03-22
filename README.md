@@ -1,7 +1,7 @@
-## Validation
+# Validation
 #### If the current device supports the needed protocols
 Before we can start the server we have to validate if the machine that we're running has the capabilities for running the server. To validate these requirements we can use the [*getprotobyname()*](https://man7.org/linux/man-pages/man3/getprotoent.3.html)to query the supported protocols in our host system and validate if we can start the server in this machine. [more on protocols](https://man7.org/linux/man-pages/man5/protocols.5.html)
-#### Conf File Validation
+## Conf File Validation
 Steps to parsing the 'server' directive:
 - found a listen? validate it's host:port and add it to a temporary vector of host:port until the end of the server directive.
 - parse the remaining 'server' options and create a ServerConfig object, and then loop the temporary vector of host:port and:
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	}
 ```
 
-## Non Blocking I/O
+# Non-Blocking I/O (*select(), poll() epoll()*)
 chapter 5.9: Introduction
 chapter 44.9-10: More info
 
@@ -91,31 +91,39 @@ fcntl(fd, F_SETFL, flags);
 
 ```
 
-#### I/O Multiplexing (*select(), poll() epoll()*)
+Now we can talk about ✨I/O Multiplexing✨
 I/O multiplexing is ideal for applications that have to either:
 - Check whenever I/O is possible on a file descriptor without blocking if it isn't
 - Check multiple file descriptors to see if I/O is possible in any of them
 chapter 63.1 specifies that we have three alternatives whenever we need to do such thing:
-- I/O Multiplexing
+- I/O Multiplexing (*select()* and *poll()*)
 - Signal-driven I/O
-- The epoll() API
-##### I/O multiplexing
-Chapter 63.1 specifies that
+- The *epoll()* API
+
+A brief overview of each alternative:
+I/O Multiplexing:
 >I/O multiplexing allows a process to simultaneously monitor multiple file descriptors to find out whether I/O is possible on any of them. The select() and poll() system calls perform I/O multiplexing.
 
-##### Signal-driven I/O 
-Chapter 63.1 specifies that
+Signal-Driven I/O
 > Signal-driven I/O is a technique whereby a process requests that the kernel send
 > it a signal when input is available or data can be written on a specified file descriptor. The process can then carry on performing other activities, and is notified when I/O becomes possible via receipt of the signal. When monitoring large numbers of file descriptors, signal-driven I/O provides significantly better performance than select() and poll().
 
-##### The epoll() API
-Chapter 63.1 specifies that
+The *epoll()* API
 > The epoll API is a Linux-specific feature that first appeared in Linux 2.6. Like the I/O multiplexing APIs, the epoll API allows a process to monitor multiple file descriptors to see if I/O is possible on any of them. Like signal-driven I/O, the epoll API provides much better performance when monitoring large numbers of file descriptors.
 
-##### Level-Triggered vs Edge-Triggered Notification
+Benchmark on *poll()*, *select()*,  and *epoll()*:
+
+| Number of descriptors monitored (N) | poll() CPU time (seconds) | select() CPU time (seconds) | epoll CPU time (seconds) |
+| ----------------------------------- | ------------------------- | --------------------------- | ------------------------ |
+| 10                                  | 0.61                      | 0.73                        | 0.41                     |
+| 100                                 | 2.9                       | 3.0                         | 0.42                     |
+| 1000                                | 35                        | 35                          | 0.53                     |
+| 10000                               | 990                       | 930                         | 0.66                     |
+	More info on chapter 63.1 (page 1328)
+## Level-Triggered vs Edge-Triggered Notification
 There are two models of readiness notification for a file descriptor:
-- Level-Trigger notification: An fd is considered ready if it's possible to perform an I/O without blocking, **regardless of whether the function would actually transfer data**.
-- Edge-Triggered notification: There was an I/O activity on the fd since it's last monitoring.
+- Level-Trigger notification: A file descriptor is considered to be ready if it is possible to perform an I/O system call without blocking.
+- Edge-Triggered notification: Notification is provided if there is I/O activity (e.g., new input) on a file descriptor since it was last monitored.
 
 | I/O Model          | Level-Triggered? | Edge-Triggered? |
 | ------------------ | :--------------: | :-------------: |
@@ -128,20 +136,11 @@ The book specifies that:
 
 And:
 > If the program employs a loop to perform as much I/O as possible on the file descriptor, and the descriptor is marked as blocking, then eventually an I/O system call will block when no more I/O is possible. For this reason, each monitored file descriptor is normally placed in nonblocking mode, and after notification of an I/O event, I/O operations are performed repeatedly until the relevant system call (e.g., read() or write()) fails with the error EAGAIN or EWOULDBLOCK.
-##### Reasoning for which technique to chose
-Check same subject on chapter 63.1 (page 1328)
 
-##### Socket I/O poll notification chart
+## Conclusion
+The best performant choices are the Signal-Driven I/O and the epoll API. Since we're not CLINICALLY INSANE, we'll be using the epoll API. More on the implementation at the end of the Classes chapter.
 
-| Condition or Event                                                     | *select()* | *poll()*                             |
-| ---------------------------------------------------------------------- | :--------: | :----------------------------------- |
-| Input Available                                                        |     r      | POLLIN                               |
-| Output Available                                                       |     w      | POLLOUT                              |
-| Incoming connection established on listening socket                    |     r      | POLLIN                               |
-| Out-of-band data received (TCP only)                                   |     x      | POLLPRI                              |
-| Stream socket peer closed connection or executed shutdown<br>(SHUT_WR) |     rw     | POLLIN<br>\| POLLOUT<br>\| POLLRDHUP |
-
-## Listener, Clients, and all things ✨Classes✨
+# Listener, Client, ServerConfig, and all things ✨Classes✨
 First things first, why do we need so many god damn classes??
 Well, since we'll be doing nonblocking i/o with epoll, we must have a vector of monitorable fds, and check for events. Whenever an event happens on a said position we have to do something, but the type of the object in that said position implies different things.
 e.g: A pollin in a Listener socket means we gotta handle a new client, but a pollin on a Client means we gotta process a new request. We also have the CGI, that is a forked process and we have to check when it ends it's processing and get the response from the child process. 
@@ -150,7 +149,7 @@ In order to do so we have two options:
 2) RTTI with <_typeinfo_> header (yikes)
 A sidenote: I'm definetly not a fan of inheritance, so we'll be using parametrized polymorphism with interfaces (yipiii).
 
-So our implementation for the Socket, Client and Cgi classes will be as follows.
+So our basic implementation for the Socket, Client and Cgi classes will be as follows.
 ```C++
 class ISocket {
 public:
@@ -171,11 +170,11 @@ class CgiSocket : public ISocket { ... } // will be a unix_socket
 Unix Sockets:
 	Unix sockets are a way of creating a socket that is only internal to the host machine, it doesn't connect to the network. If we need a pair of connected Unix sockets, instead of calling *socket()*, *bind()*, *listen()*, *connect()*, and *accept()*, the socketpair call provides two connected sockets (chapter 57.5).
 
-#### Classes interaction in regards to the Conf file and Runtime.
+## Classes interaction in regards to the Conf file and Runtime.
 Ok, we got the monitorable i/o classes all figured out, but we still have an issue because of the 42's project pdf. It states that:
 > The first server for a host:port will be the default for this host:port (that means it will answer to all the requests that don’t belong to an other server).
 
-Les't use the following as an example:
+Let's use the following as an example:
 ```YAML
 server {
     listen localhost:4040;
@@ -244,6 +243,12 @@ class Request : public ISocket {
 // Unchanged for now
 class CgiSocket : public ISocket { ... } // will be a unix_socket
 ```
+## The epoll() API and how we translate her into our use case
+#### Using *epoll()* with Level Trigger.
+By default, the epoll mechanism provides level-triggered notification. By this, we mean that epoll tells us whether an I/O operation can be performed on a file descriptor without blocking. This is the same type of notification as is provided by poll() and select()
+#### Using *epoll()* with Edge trigger
+Whenever we use the *epoll()* setup as Edge trigger "...(when) multiple I/O events occur, epoll coalesces them into a single notification returned via epoll_wait(); with signal-driven I/O, multiple signals may be generated". This means that we'll have to handle the POLLs in every notified fd for every *epoll_wait()* call.
+
 
 ## References
 - The linux Programming interface, chapters:
