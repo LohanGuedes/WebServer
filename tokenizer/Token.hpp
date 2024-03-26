@@ -3,8 +3,6 @@
 #include <string>
 
 enum class token_type {
-  eof,
-  illegal,
 
   // delimiters
   comma,
@@ -31,14 +29,22 @@ enum class token_type {
   // http allowed methods
   m_get,
   m_post,
-  m_delete
+  m_delete,
+
+  eof,
+  illegal,
 };
 
 class Token {
 public:
   void set_literal(std::string);
   void set_type(token_type);
+
+  token_type get_type();
+  std::string get_literal();
+
   Token(token_type, std::string);
+  Token();
   ~Token();
   static token_type get_identifier(std::string);
 

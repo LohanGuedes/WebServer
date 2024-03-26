@@ -1,13 +1,18 @@
 #include "Token.hpp"
 
 Token::Token(token_type t_type, std::string literal)
-    : _literal{literal}, _type{t_type} {
+    : _literal(literal), _type(t_type) {
   return;
 }
+
+Token::Token() { return; }
 
 Token::~Token() {}
 
 void Token::set_literal(std::string literal) { this->_literal = literal; }
+
+std::string Token::get_literal() { return this->_literal; }
+token_type Token::get_type() { return this->_type; }
 
 void Token::set_type(token_type t_type) { this->_type = t_type; }
 

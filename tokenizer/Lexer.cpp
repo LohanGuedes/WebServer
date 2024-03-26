@@ -1,4 +1,12 @@
 #include "Lexer.hpp"
+#include "Token.hpp"
+
+#include <cctype>
+#include <iostream>
+
+bool isLetter(char ch) {
+  return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_';
+}
 
 Lexer::Lexer(const std::string file_content)
     : _input(file_content), _position(0), _read_position(0),
@@ -21,44 +29,59 @@ void Lexer::read_char(void) {
 }
 
 Token *Lexer::next_token() {
+  Token *tok = new Token();
+
+  this->consume_whitespace();
+
   switch (this->_byte) {
   case ';':
-    return new Token(token_type::semicolon, std::string(1, this->_byte));
+    tok->set_type(token_type::semicolon);
+    tok->set_literal(std::string(1, this->_byte));
     break;
   case '{':
-    return new Token(token_type::rbracket, std::string(1, this->_byte));
+    tok->set_type(token_type::lbracket);
+    tok->set_literal(std::string(1, this->_byte));
     break;
   case '}':
-    return new Token(token_type::lbracket, std::string(1, this->_byte));
+    tok->set_type(token_type::rbracket);
+    tok->set_literal(std::string(1, this->_byte));
     break;
   case ',':
-    return new Token(token_type::comma, std::string(1, this->_byte));
+    tok->set_type(token_type::comma);
+    tok->set_literal(std::string(1, this->_byte));
     break;
   case '\0':
-    return new Token(token_type::eof, "");
+    tok->set_type(token_type::eof);
+    tok->set_literal(std::string(1, this->_byte));
     break;
   default:
     /* the following if might be wrong... Write a custom isLetter or isAlpha
      * check for: ":,_-" */
-    if (std::isalpha(this->_byte)) {
-      std::string ident = this->read_identifier();
-      return new Token(Token::get_identifier(ident), ident);
+    if (isLetter(this->_byte)) {
+      tok->set_literal(this->read_identifier());
+      tok->set_type(Token::get_identifier(tok->get_literal()));
     } else {
       return new Token(token_type::illegal, std::string(1, this->_byte));
     }
   }
 
-  // TODO: THIS IS WRONG!!!!
-  /* this->read_char(); */
-  return new Token(token_type::illegal, "");
+  this->read_char();
+  return tok;
 }
 
 std::string Lexer::read_identifier() {
   size_t start = this->_position;
 
-  while (std::isalpha(this->_byte)) {
+  while (isLetter(this->_byte)) {
     this->read_char();
   }
 
-  return this->_input.substr(start, this->_position);
+  return this->_input.substr(start, this->_position - start);
+}
+
+void Lexer::consume_whitespace() {
+  while (this->_byte == ' ' || this->_byte == '\t' || this->_byte == '\n' ||
+         this->_byte == '\r') {
+    this->read_char();
+  }
 }

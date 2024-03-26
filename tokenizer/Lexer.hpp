@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./token.hpp"
+#include "Token.hpp"
 #include <string>
 
 class Lexer {
@@ -9,6 +9,7 @@ public:
   ~Lexer();
   void read_char(void);
   Token *next_token();
+  void consume_whitespace();
   std::string read_identifier();
 
 private:
