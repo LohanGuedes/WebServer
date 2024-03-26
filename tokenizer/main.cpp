@@ -7,14 +7,26 @@
 // TESTS ARE WRITTEN IN C++11 or bigger!!! not project related!
 
 void test_simple_input(void) {
-  std::string input = ";    {}, server   root  test";
+  std::string input = "server {\
+                        location /folder {\
+                            root something \
+                        }\
+};";
 
   Token expected_tokens[] = {
-      Token(token_type::semicolon, ";"),     Token(token_type::lbracket, "{"),
-      Token(token_type::rbracket, "}"),      Token(token_type::comma, ","),
-      Token(token_type::server, "server"),   Token(token_type::root, "root"),
-      Token(token_type::identifier, "test"),
-      /* Token(token_type::eof, "\0"), */ // TODO: Make this pass
+      Token(token_type::server, "server"),
+      Token(token_type::lbracket, "{"),
+      Token(token_type::location, "location"),
+      Token(token_type::identifier, "/folder"),
+      Token(token_type::lbracket, "{"),
+      Token(token_type::root, "root"),
+      Token(token_type::identifier, "something"),
+      Token(token_type::rbracket, "}"),
+      Token(token_type::rbracket, "}"),
+      Token(token_type::semicolon, ";"),
+      // NOTE: this will show up as a fail in the tests. but the output is
+      // equal.
+      Token(token_type::eof, "\0"),
   };
 
   Lexer lex = Lexer(input);

@@ -5,7 +5,8 @@
 #include <iostream>
 
 bool isLetter(char ch) {
-  return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_';
+  return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' ||
+         ch == '/';
 }
 
 Lexer::Lexer(const std::string file_content)
