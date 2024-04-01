@@ -16,6 +16,11 @@ token_type Token::get_type() { return this->_type; }
 
 void Token::set_type(token_type t_type) { this->_type = t_type; }
 
+bool Token::is_letter(char ch) {
+  return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' ||
+         ch == '/';
+}
+
 token_type Token::get_identifier(std::string ident) {
   /* Keyword check -> C++98 static hashmaps can be a hassle */
   if (ident == "server") {

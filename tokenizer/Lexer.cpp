@@ -4,11 +4,6 @@
 #include <cctype>
 #include <iostream>
 
-bool isLetter(char ch) {
-  return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' ||
-         ch == '/';
-}
-
 Lexer::Lexer(const std::string file_content)
     : _input(file_content), _position(0), _read_position(0),
       _byte(file_content[0]) {
@@ -56,9 +51,7 @@ Token *Lexer::next_token() {
     tok->set_literal(std::string(1, this->_byte));
     break;
   default:
-    /* the following if might be wrong... Write a custom isLetter or isAlpha
-     * check for: ":,_-" */
-    if (isLetter(this->_byte)) {
+    if (Token::is_letter(this->_byte)) {
       tok->set_literal(this->read_identifier());
       tok->set_type(Token::get_identifier(tok->get_literal()));
     } else {
@@ -73,7 +66,7 @@ Token *Lexer::next_token() {
 std::string Lexer::read_identifier() {
   size_t start = this->_position;
 
-  while (isLetter(this->_byte)) {
+  while (Token::is_letter(this->_byte)) {
     this->read_char();
   }
 

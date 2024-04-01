@@ -46,6 +46,9 @@ public:
   Token(token_type, std::string);
   Token();
   ~Token();
+
+  static bool is_letter(char);
+
   static token_type get_identifier(std::string);
 
 private:
