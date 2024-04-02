@@ -52,6 +52,7 @@ Token *Lexer::next_token() {
       tok->set_literal(this->read_identifier());
       tok->set_type(Token::get_identifier(tok->get_literal()));
     } else {
+      delete tok;
       return new Token(token_type::illegal, std::string(1, this->_byte));
     }
   }
@@ -72,7 +73,7 @@ std::string Lexer::read_identifier() {
 
 void Lexer::consume_whitespace() {
   while (this->_byte == ' ' || this->_byte == '\t' || this->_byte == '\n' ||
-         this->_byte == '\r') {
+         this->_byte == '\r') { // change it for "isWhitespace"
     this->read_char();
   }
 }
