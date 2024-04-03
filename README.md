@@ -176,10 +176,10 @@ Ok, we got the monitorable i/o classes all figured out, but we still have an iss
 
 Let's use the following as an example:
 ```YAML
-server {
-    listen localhost:4040;
-    listen 127.0.0.1:4041;
-    server_name lguedes;
+server { # ServerConfig grouper
+    listen localhost:4040; # If unique -> new listener
+    listen 127.0.0.1:4041; # 
+    server_name lguedes; # ServerConfig name
 }
 
 server {
