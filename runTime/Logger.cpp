@@ -7,7 +7,7 @@ Logger::~Logger() {}
 void Logger::log(LOG_LEVEL level, const std::string message) throw() {
   const std::time_t curr_time = std::time(0);
   std::string result;
-  char timestamp[30] = {0};
+  char timestamp[21] = {0};
 
   switch (level) {
   case (LOG_INFO):
@@ -22,7 +22,7 @@ void Logger::log(LOG_LEVEL level, const std::string message) throw() {
     result.append("[ERROR] ");
     break;
   }
-  std::strftime(timestamp, sizeof(timestamp) - 1, "[%y/%m/%d:%H:%M:%S] ",
+  std::strftime(timestamp, sizeof(timestamp), "[%y/%m/%d %H:%M:%S] ",
                 gmtime(&curr_time));
   result.append(timestamp);
   result.append(message);
