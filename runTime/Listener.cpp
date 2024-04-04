@@ -1,12 +1,18 @@
 #include "Listener.hpp"
-#include "ISocket.hpp"
+#include "APollable.hpp"
+#include <arpa/inet.h>
 #include <sys/epoll.h>
+#include <sys/socket.h>
 
 Listener::Listener(std::string address, int port)
-    : ISocket(), epoll_conf(Listener::get_epoll_event(this)) {
+    : APollable(Listener::getEpollEventStruct()) {
 
-  int val = 1;
-  struct sockaddr_in conf;
+  const int val = 1;
+  const struct sockaddr_in conf = {
+      .sin_family = AF_INET,
+      .sin_port = ntohs(port),
+      .sin_addr = {.s_addr = inet_addr(address.c_str())},
+      .sin_zero = {0}};
 
   // create the socket
   if ((this->_fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK,
@@ -19,10 +25,6 @@ Listener::Listener(std::string address, int port)
     throw SocketCreateException();
   }
 
-  // setup the conf struct to bind
-  conf.sin_family = AF_INET;
-  conf.sin_addr.s_addr = inet_addr(address.c_str());
-  conf.sin_port = ntohs(port);
   if (bind(this->_fd, (struct sockaddr *)&conf, sizeof(struct sockaddr_in)) ==
       -1) {
     throw SocketCreateException();
@@ -42,12 +44,6 @@ void Listener::handlePoll(epoll_event_bitflag bitflag) {
   return;
 }
 
-void Listener::handlePollin(epoll_event_bitflag value) { (void)value; }
-
-void Listener::handlePollout(void) {}
-
-int Listener::getFd(void) { return (this->_fd); }
-
 void Listener::listen(void) {
   // start listening
   if (::listen(this->_fd, SOMAXCONN) == -1) {
@@ -56,10 +52,7 @@ void Listener::listen(void) {
   return;
 }
 
-struct epoll_event Listener::get_epoll_event(Listener *addr) {
-  struct epoll_event ev;
-
-  ev.events = EPOLLIN | EPOLLET;
-  ev.data.ptr = addr;
-  return (ev);
+struct epoll_event Listener::getEpollEventStruct(void) const throw() {
+  return ((struct epoll_event){.events = EPOLLIN | EPOLLET,
+                               .data = {.ptr = (void *)this}});
 }
