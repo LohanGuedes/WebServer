@@ -18,9 +18,15 @@ public:
 
   // getters / setters
   inline int getEpollInstance() const throw();
-  bool startEpollInstance(void) throw();
-  bool checkEpoll(void) const throw();
+
+  // initialization
+  bool createEpollInstance(void) throw();
   bool startListeners(void) const;
+  bool addListenersToEpoll(void) throw();
+
+  // event loop
+  bool addToEpoll(const APollable *socket) throw();
+  bool checkEpoll(void) const throw();
 
   // cleanup
   bool closeListeners(void) throw();
@@ -38,7 +44,6 @@ private:
   // private constructor is for the Singleton pattern
   RunTime(void);
 
-  bool addToEpoll(const APollable *socket) throw();
   static RunTime *_instance;
   int _epollInstance;
 };

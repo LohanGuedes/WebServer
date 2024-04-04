@@ -33,18 +33,53 @@ RunTime::~RunTime(void) {
   Logger::log(LOG_INFO, "RunTime instance deleted");
 }
 
-bool RunTime::startEpollInstance(void) throw() {
+inline int RunTime::getEpollInstance() const throw() {
+  return (this->_epollInstance);
+}
+
+// initialization //
+
+bool RunTime::createEpollInstance(void) throw() {
   if (this->_epollInstance == -1) {
     this->_epollInstance = epoll_create1(EPOLL_CLOEXEC);
   }
   return (this->_epollInstance != -1);
 }
 
+bool RunTime::startListeners(void) const {
+  std::stringstream ss;
+
+  const std::vector<const Listener *>::size_type size =
+      this->listenerPool.size();
+
+  for (std::vector<const Listener *>::size_type i = 0; i < size; i++) {
+    this->listenerPool[i]->listen();
+    ss.clear();
+    ss << "Listener started for host [" << this->listenerPool[i]->address
+       << "] and port [" << this->listenerPool[i]->port << "]";
+    Logger::log(LOG_INFO, ss.str());
+  }
+  return (true);
+}
+
+bool RunTime::addListenersToEpoll(void) throw() {
+  const std::vector<const Listener *>::size_type size =
+      this->listenerPool.size();
+
+  for (std::vector<const Listener *>::size_type i = 0; i < size; i++) {
+    this->addToEpoll(this->listenerPool[i]);
+  }
+
+  return (true);
+}
+
+// event loop //
+
 bool RunTime::addToEpoll(const APollable *newInstance) throw() {
   const struct epoll_event events = newInstance->getEpollEventStruct();
 
   return (epoll_ctl(this->_epollInstance, EPOLL_CTL_ADD, *newInstance->fd_ptr,
-                    const_cast<struct epoll_event *>(&events)) &&
+                    const_cast<struct epoll_event *>(&events)) == 0 &&
           this->epollCount++);
 }
 
@@ -64,26 +99,6 @@ bool RunTime::checkEpoll(void) const throw() {
     extractedData = reinterpret_cast<APollable *>(events[i].data.ptr);
     extractedData->handlePoll(events[i].events);
     i++;
-  }
-  return (true);
-}
-
-inline int RunTime::getEpollInstance() const throw() {
-  return (this->_epollInstance);
-}
-
-bool RunTime::startListeners(void) const {
-  std::stringstream ss;
-
-  const std::vector<const Listener *>::size_type size =
-      this->listenerPool.size();
-
-  for (std::vector<const Listener *>::size_type i = 0; i < size; i++) {
-    this->listenerPool[i]->listen();
-    ss.clear();
-    ss << "Listener started for host [" << this->listenerPool[i]->address
-       << "] and port [" << this->listenerPool[i]->port << "]";
-    Logger::log(LOG_INFO, ss.str());
   }
   return (true);
 }
