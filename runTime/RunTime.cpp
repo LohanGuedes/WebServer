@@ -1,12 +1,15 @@
 #include "RunTime.hpp"
 #include "APollable.hpp"
+#include "Listener.hpp"
 #include "Logger.hpp"
+#include <sstream>
 #include <sys/epoll.h>
+#include <vector>
 
 // Static variables have to be initialized like this
 RunTime *RunTime::_instance = NULL;
 
-RunTime::RunTime(void) : _epoll_fd(-1) {}
+RunTime::RunTime(void) : epollCount(0), _epollInstance(-1) {}
 
 RunTime *RunTime::getInstance(void) throw() {
   if (!RunTime::_instance) {
@@ -25,23 +28,84 @@ void RunTime::deleteInstance(void) throw() {
   delete RunTime::getInstance();
 }
 
-RunTime::~RunTime(void) { Logger::log(LOG_INFO, "RunTime instance deleted"); }
+RunTime::~RunTime(void) {
+  this->closeListeners();
+  Logger::log(LOG_INFO, "RunTime instance deleted");
+}
 
-int RunTime::getEpollFd(void) const throw() { return (this->_epoll_fd); }
-
-bool RunTime::startEpollInstance(void) {
-  if (this->_epoll_fd == -1) {
-    this->_epoll_fd = epoll_create1(EPOLL_CLOEXEC);
+bool RunTime::startEpollInstance(void) throw() {
+  if (this->_epollInstance == -1) {
+    this->_epollInstance = epoll_create1(EPOLL_CLOEXEC);
   }
-  return (this->_epoll_fd != -1);
+  return (this->_epollInstance != -1);
 }
 
 bool RunTime::addToEpoll(const APollable *newInstance) throw() {
   const struct epoll_event events = newInstance->getEpollEventStruct();
 
-  return (epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, *newInstance->fd_ptr,
-                    const_cast<struct epoll_event *>(&events)));
+  return (epoll_ctl(this->_epollInstance, EPOLL_CTL_ADD, *newInstance->fd_ptr,
+                    const_cast<struct epoll_event *>(&events)) &&
+          this->epollCount++);
 }
+
+bool RunTime::checkEpoll(void) const throw() {
+  Logger::log(LOG_INFO, "Entrou na checkEpoll");
+  std::vector<struct epoll_event> events(this->epollCount);
+  std::vector<struct epoll_event>::size_type i = 0;
+  APollable *extractedData;
+
+  const int loop_ceiling =
+      epoll_wait(this->_epollInstance, &events.at(0), this->epollCount, 0);
+  if (loop_ceiling < 0) {
+    return (false);
+  }
+  Logger::log(LOG_INFO, "Passou do epoll_wait");
+  while (i < (std::vector<struct epoll_event>::size_type)loop_ceiling) {
+    extractedData = reinterpret_cast<APollable *>(events[i].data.ptr);
+    extractedData->handlePoll(events[i].events);
+    i++;
+  }
+  return (true);
+}
+
+inline int RunTime::getEpollInstance() const throw() {
+  return (this->_epollInstance);
+}
+
+bool RunTime::startListeners(void) const {
+  std::stringstream ss;
+
+  const std::vector<const Listener *>::size_type size =
+      this->listenerPool.size();
+
+  for (std::vector<const Listener *>::size_type i = 0; i < size; i++) {
+    this->listenerPool[i]->listen();
+    ss.clear();
+    ss << "Listener started for host [" << this->listenerPool[i]->address
+       << "] and port [" << this->listenerPool[i]->port << "]";
+    Logger::log(LOG_INFO, ss.str());
+  }
+  return (true);
+}
+
+//
+bool RunTime::closeListeners(void) throw() {
+  std::stringstream ss;
+  const std::vector<const Listener *>::size_type size =
+      this->listenerPool.size();
+
+  for (std::vector<const Listener *>::size_type i = 0; i < size; i++) {
+    ss.clear();
+    ss << "Stopping Listener host [" << this->listenerPool[i]->address
+       << "] and port [" << this->listenerPool[i]->port << "]";
+    Logger::log(LOG_INFO, ss.str());
+    close(*this->listenerPool[i]->fd_ptr);
+    delete this->listenerPool[i];
+  }
+
+  return (true);
+}
+
 #if 0
 // toda request que chegar vai ser um novo client, a não ser que seja uma
 // request em chunk. Essa solução abaixo vai permitir que eu leia em partes

@@ -12,13 +12,18 @@ public:
   static RunTime *getInstance(void) throw();
   static void deleteInstance(void) throw();
 
+  // variables
   std::vector<Listener const *> listenerPool;
+  unsigned int epollCount;
 
   // getters / setters
-  int getEpollFd(void) const throw();
-  bool startEpollInstance(void);
-  bool addToEpoll(const APollable *socket) throw();
-  int checkEpoll(void) const throw();
+  inline int getEpollInstance() const throw();
+  bool startEpollInstance(void) throw();
+  bool checkEpoll(void) const throw();
+  bool startListeners(void) const;
+
+  // cleanup
+  bool closeListeners(void) throw();
 
   // exceptions
 #if 0
@@ -33,8 +38,9 @@ private:
   // private constructor is for the Singleton pattern
   RunTime(void);
 
+  bool addToEpoll(const APollable *socket) throw();
   static RunTime *_instance;
-  int _epoll_fd;
+  int _epollInstance;
 };
 
 #endif // RunTime

@@ -21,7 +21,11 @@ public:
   // methods
   virtual void handlePoll(epoll_event_bitflag bitflag);
   virtual struct epoll_event getEpollEventStruct(void) const throw();
-  void listen(void);
+  void listen(void) const;
+
+  // fields
+  const std::string address;
+  const int port;
 
 #if 0
 		std::vector<ServerConfig>		configPool;

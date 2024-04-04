@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 
 Listener::Listener(std::string address, int port)
-    : APollable(Listener::getEpollEventStruct()) {
+    : APollable(Listener::getEpollEventStruct()), address(address), port(port) {
 
   const int val = 1;
   const struct sockaddr_in conf = {
@@ -44,7 +44,7 @@ void Listener::handlePoll(epoll_event_bitflag bitflag) {
   return;
 }
 
-void Listener::listen(void) {
+void Listener::listen(void) const {
   // start listening
   if (::listen(this->_fd, SOMAXCONN) == -1) {
     throw SocketListenException();
