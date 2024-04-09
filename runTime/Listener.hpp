@@ -22,6 +22,7 @@ public:
   virtual void handlePoll(epoll_event_bitflag bitflag);
   virtual struct epoll_event getEpollEventStruct(void) const throw();
   void listen(void) const;
+  void handlePollin(void);
 
   // fields
   const std::string address;

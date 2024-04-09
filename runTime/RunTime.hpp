@@ -1,9 +1,14 @@
 #ifndef RUNTIME_HPP
 #define RUNTIME_HPP
 #include "APollable.hpp"
+#include "Client.hpp"
 #include "Listener.hpp"
 #include <iostream>
+#include <list>
 #include <vector>
+
+#define BLOCKING_CHECK -1
+#define NONBLOCKING_CHECK 0
 
 class RunTime {
 public:
@@ -14,6 +19,8 @@ public:
 
   // variables
   std::vector<Listener const *> listenerPool;
+  std::vector<int> requestPool;
+  std::list<Client const *> clientPool;
   unsigned int epollCount;
 
   // getters / setters
@@ -26,7 +33,8 @@ public:
 
   // event loop
   bool addToEpoll(const APollable *socket) throw();
-  bool checkEpoll(void) const throw();
+  bool checkEpoll(int checkType) const throw();
+  bool processRequests(void);
 
   // cleanup
   bool closeListeners(void) throw();

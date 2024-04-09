@@ -9,9 +9,18 @@ int main(void) {
   RunTime *runTime = RunTime::getInstance(); // initialize RunTime
   (void)runTime;
   const Listener *listen = new Listener("127.0.0.1", 8080);
+  int checkType;
 
   runTime->listenerPool.push_back(listen);
+  runTime->createEpollInstance();
   runTime->startListeners();
+  runTime->addListenersToEpoll();
+  while (true) {
+    checkType =
+        (runTime->requestPool.size() == 0) ? BLOCKING_CHECK : NONBLOCKING_CHECK;
+    runTime->checkEpoll(checkType);
+    runTime->processRequests();
+  }
 
   RunTime::deleteInstance(); // delete RunTime
   return (0);

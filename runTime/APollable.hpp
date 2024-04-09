@@ -21,4 +21,4 @@ protected:
   const struct epoll_event _events;
 };
 
-#endif // !ISOCKET_HPP
+#endif // !APOLLABLE_HPP

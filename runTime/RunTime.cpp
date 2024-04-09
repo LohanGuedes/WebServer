@@ -55,7 +55,7 @@ bool RunTime::startListeners(void) const {
   for (std::vector<const Listener *>::size_type i = 0; i < size; i++) {
     this->listenerPool[i]->listen();
     ss.clear();
-    ss << "Listener started for host [" << this->listenerPool[i]->address
+    ss << "Starting Listener host [" << this->listenerPool[i]->address
        << "] and port [" << this->listenerPool[i]->port << "]";
     Logger::log(LOG_INFO, ss.str());
   }
@@ -83,14 +83,17 @@ bool RunTime::addToEpoll(const APollable *newInstance) throw() {
           this->epollCount++);
 }
 
-bool RunTime::checkEpoll(void) const throw() {
+bool RunTime::checkEpoll(int checkType) const throw() {
   Logger::log(LOG_INFO, "Entrou na checkEpoll");
   std::vector<struct epoll_event> events(this->epollCount);
   std::vector<struct epoll_event>::size_type i = 0;
   APollable *extractedData;
+  std::stringstream ss;
 
-  const int loop_ceiling =
-      epoll_wait(this->_epollInstance, &events.at(0), this->epollCount, 0);
+  ss << "O valor de i é " << checkType;
+  Logger::log(LOG_INFO, ss.str());
+  const int loop_ceiling = epoll_wait(this->_epollInstance, &events.at(0),
+                                      this->epollCount, checkType);
   if (loop_ceiling < 0) {
     return (false);
   }
@@ -103,7 +106,15 @@ bool RunTime::checkEpoll(void) const throw() {
   return (true);
 }
 
-//
+bool RunTime::processRequests(void) {
+  std::vector<int>::size_type size = this->requestPool.size();
+  for (std::vector<int>::size_type i = 0; i < size; i++) {
+    std::cout << "request " << i << "sendo processada" << std::endl;
+  }
+  return (true);
+}
+
+// cleanup
 bool RunTime::closeListeners(void) throw() {
   std::stringstream ss;
   const std::vector<const Listener *>::size_type size =
