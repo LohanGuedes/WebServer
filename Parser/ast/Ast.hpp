@@ -5,7 +5,7 @@
 #include "./IAst.hpp"
 
 /* vaitomarnocusaiago n aguento mais codar cpp */
-class ListenSatement {
+class ListenStatement {
 public:
   Token tok;
   IExpression value;
