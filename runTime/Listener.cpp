@@ -35,7 +35,11 @@ Listener::Listener(std::string address, int port)
     }
 }
 
-Listener::~Listener(void) { close(this->_fd); }
+Listener::~Listener(void) {
+	if (this->_fd != -1)
+		close(this->_fd);
+	return ;
+}
 
 void Listener::handlePoll(epoll_event_bitflag bitflag) {
     if (bitflag & EPOLLIN) {

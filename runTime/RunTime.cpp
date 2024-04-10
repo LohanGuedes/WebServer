@@ -99,6 +99,7 @@ bool RunTime::checkEpoll(int checkType) const throw() {
   }
   Logger::log(LOG_INFO, "Passou do epoll_wait");
   while (i < (std::vector<struct epoll_event>::size_type)loop_ceiling) {
+	//              c++ moment KEKW
     extractedData = reinterpret_cast<APollable *>(events[i].data.ptr);
     extractedData->handlePoll(events[i].events);
     i++;
@@ -125,7 +126,6 @@ bool RunTime::closeListeners(void) throw() {
     ss << "Stopping Listener host [" << this->listenerPool[i]->address
        << "] and port [" << this->listenerPool[i]->port << "]";
     Logger::log(LOG_INFO, ss.str());
-    close(*this->listenerPool[i]->fd_ptr);
     delete this->listenerPool[i];
   }
 
