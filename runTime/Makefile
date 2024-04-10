@@ -2,14 +2,18 @@ NAME = test
 
 
 SRCS =	main.cpp \
+		Logger.cpp \
 		RunTime.cpp \
 		Listener.cpp \
+		Client.cpp \
 
 
 DEPS =	$(SRCS) \
+		Logger.hpp \
 		RunTime.hpp \
-		ISocket.hpp \
+		APollable.hpp \
 		Listener.hpp \
+		Client.hpp \
 
 CC = c++
 

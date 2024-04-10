@@ -1,19 +1,29 @@
 #include "Listener.hpp"
+#include "Logger.hpp"
 #include "RunTime.hpp"
 #include <cstdlib>
 #include <sys/epoll.h>
 #include <vector>
 
 int main(void) {
-  const RunTime *ptr;
-  const RunTime *ptr2;
+  RunTime *runTime = RunTime::getInstance(); // initialize RunTime
+  (void)runTime;
+  const Listener *listen = new Listener("127.0.0.1", 8080);
+  int checkType;
 
-  ptr = RunTime::getInstance();
-  std::cout << ptr->str << std::endl;
-  const_cast<RunTime *>(ptr)->str = "Oie 2";
-  ptr2 = RunTime::getInstance();
-  std::cout << ptr2->str << std::endl;
-  std::cout << ptr->str << std::endl;
+  runTime->listenerPool.push_back(listen);
+  runTime->createEpollInstance();
+  runTime->startListeners();
+  runTime->addListenersToEpoll();
+  while (true) {
+    checkType =
+        (runTime->requestPool.size() == 0) ? BLOCKING_CHECK : NONBLOCKING_CHECK;
+    runTime->checkEpoll(checkType);
+    runTime->processRequests();
+  }
+
+  RunTime::deleteInstance(); // delete RunTime
+  return (0);
 }
 #if 0
 int main(void) {
