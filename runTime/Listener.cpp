@@ -4,17 +4,19 @@
 #include "Logger.hpp"
 #include "RunTime.hpp"
 #include <arpa/inet.h>
+#include <cstdlib>
 #include <list>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 
-Listener::Listener(std::string host, int port)
-    : APollable(Listener::getEpollEventStruct()), host(host), port(port) {
+Listener::Listener(std::string const &host, std::string const &port)
+    : APollable(Listener::getEpollEventStruct()), host(host),
+      port(atoi(port.c_str())), hostPortHash(RunTime::hashStr(host + port)) {
 
     const int                val = 1;
     const struct sockaddr_in conf = {
         .sin_family = AF_INET,
-        .sin_port = ntohs(port),
+        .sin_port = ntohs(this->port),
         .sin_addr = {.s_addr = inet_addr(host.c_str())},
         .sin_zero = {0}};
 

@@ -2,6 +2,7 @@
 #include "APollable.hpp"
 #include "Listener.hpp"
 #include "Logger.hpp"
+#include <new>
 #include <sstream>
 #include <sys/epoll.h>
 #include <vector>
@@ -38,6 +39,36 @@ inline int RunTime::getEpollInstance() const throw() {
 }
 
 // initialization //
+
+int RunTime::addListener(std::string const &host, std::string const &port) {
+    unsigned long hash = RunTime::hashStr(host + port);
+    Listener     *newListener;
+
+    for (size_t i = 0; i < this->listenerPool.size(); i++) {
+        if (this->listenerPool[i]->hostPortHash == hash) {
+            return (1);
+        }
+    }
+    newListener = new (std::nothrow) Listener(host, port);
+    if (newListener == NULL) {
+        return (-1);
+    }
+    this->listenerPool.push_back(newListener);
+    return (0);
+}
+
+int RunTime::addListener(Listener const *newListener) {
+    if (!newListener) {
+        return (-1);
+    }
+    for (size_t i = 0; i < this->listenerPool.size(); ++i) {
+        if (this->listenerPool[i]->hostPortHash == newListener->hostPortHash) {
+            return (1);
+        }
+    }
+    this->listenerPool.push_back(newListener);
+    return (0);
+}
 
 bool RunTime::createEpollInstance(void) throw() {
     if (this->_epollInstance == -1) {
@@ -130,6 +161,17 @@ bool RunTime::closeListeners(void) throw() {
     }
 
     return (true);
+}
+
+unsigned long RunTime::hashStr(std::string const &str) {
+    unsigned long hash = 5318; // magic number;
+    char          c;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        c = str[i];
+        hash = ((hash << 5) + hash) + c; // isso é: hash * 33 + c
+    }
+    return hash;
 }
 
 #if 0

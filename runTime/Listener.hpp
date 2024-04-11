@@ -15,7 +15,7 @@
 class Listener : public APollable {
   public:
     // constructors / destructors
-    Listener(std::string host, int port);
+    Listener(std::string const &host, std::string const &port);
     virtual ~Listener(void);
 
     // methods
@@ -25,8 +25,9 @@ class Listener : public APollable {
     void                       handlePollin(void);
 
     // fields
-    const std::string host;
-    const int         port;
+    const std::string   host;
+    const int           port;
+    const unsigned long hostPortHash;
 
 #if 0
 		std::vector<ServerConfig>		configPool;
