@@ -25,8 +25,11 @@ class RunTime {
 
     // getters / setters
     inline int getEpollInstance() const throw();
-    int        addListener(std::string const &host, std::string const &port);
-    int        addListener(Listener const *newListener);
+    int addListener(std::string const &host, std::string const &port) throw();
+    int addListener(Listener const *newListener) throw();
+    Listener const *getListener(std::string const &host,
+                                std::string const &port) const throw();
+    Listener const *getListener(const unsigned int hash) const throw();
 
     // initialization
     bool createEpollInstance(void) throw();

@@ -40,7 +40,8 @@ inline int RunTime::getEpollInstance() const throw() {
 
 // initialization //
 
-int RunTime::addListener(std::string const &host, std::string const &port) {
+int RunTime::addListener(std::string const &host,
+                         std::string const &port) throw() {
     unsigned long hash = Listener::hashStr(host + port);
     Listener     *newListener;
 
@@ -57,7 +58,7 @@ int RunTime::addListener(std::string const &host, std::string const &port) {
     return (0);
 }
 
-int RunTime::addListener(Listener const *newListener) {
+int RunTime::addListener(Listener const *newListener) throw() {
     if (!newListener) {
         return (-1);
     }
@@ -68,6 +69,27 @@ int RunTime::addListener(Listener const *newListener) {
     }
     this->listenerPool.push_back(newListener);
     return (0);
+}
+
+Listener const *RunTime::getListener(std::string const &host,
+                                     std::string const &port) const throw() {
+    const unsigned int hash = Listener::hashStr(host + port);
+
+    for (size_t i = 0; i < this->listenerPool.size(); i++) {
+        if (this->listenerPool[i]->hostPortHash == hash) {
+            return (this->listenerPool[i]);
+        }
+    }
+    return (NULL);
+}
+
+Listener const *RunTime::getListener(const unsigned int hash) const throw() {
+    for (size_t i = 0; i < this->listenerPool.size(); i++) {
+        if (this->listenerPool[i]->hostPortHash == hash) {
+            return (this->listenerPool[i]);
+        }
+    }
+    return (NULL);
 }
 
 bool RunTime::createEpollInstance(void) throw() {
