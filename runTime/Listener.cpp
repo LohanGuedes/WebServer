@@ -4,18 +4,20 @@
 #include "Logger.hpp"
 #include "RunTime.hpp"
 #include <arpa/inet.h>
+#include <cstdlib>
 #include <list>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 
-Listener::Listener(std::string address, int port)
-    : APollable(Listener::getEpollEventStruct()), address(address), port(port) {
+Listener::Listener(std::string const &host, std::string const &port)
+    : APollable(Listener::getEpollEventStruct()), host(host),
+      port(atoi(port.c_str())), hostPortHash(Listener::hashStr(host + port)) {
 
-    const int val = 1;
+    const int                val = 1;
     const struct sockaddr_in conf = {
         .sin_family = AF_INET,
-        .sin_port = ntohs(port),
-        .sin_addr = {.s_addr = inet_addr(address.c_str())},
+        .sin_port = ntohs(this->port),
+        .sin_addr = {.s_addr = inet_addr(host.c_str())},
         .sin_zero = {0}};
 
     // create the socket
@@ -35,7 +37,11 @@ Listener::Listener(std::string address, int port)
     }
 }
 
-Listener::~Listener(void) { close(this->_fd); }
+Listener::~Listener(void) {
+    if (this->_fd != -1)
+        close(this->_fd);
+    return;
+}
 
 void Listener::handlePoll(epoll_event_bitflag bitflag) {
     if (bitflag & EPOLLIN) {
@@ -57,8 +63,8 @@ void Listener::listen(void) const {
 
 void Listener::handlePollin(void) {
     RunTime *const runTime = RunTime::getInstance();
-    const Client *newClient;
-    const int fd =
+    const Client  *newClient;
+    const int      fd =
         accept(*this->fd_ptr, NULL,
                NULL); // fill these null pointers to get info on the peer socket
     if (fd < 0) {
@@ -70,6 +76,17 @@ void Listener::handlePollin(void) {
     runTime->clientPool.push_back(newClient);
 
     return;
+}
+
+unsigned long Listener::hashStr(std::string const &str) {
+    unsigned long hash = 5318; // magic number;
+    char          c;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        c = str[i];
+        hash = ((hash << 5) + hash) + c; // isso é: hash * 33 + c
+    }
+    return hash;
 }
 
 struct epoll_event Listener::getEpollEventStruct(void) const throw() {
