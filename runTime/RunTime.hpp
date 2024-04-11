@@ -41,9 +41,6 @@ class RunTime {
     // cleanup
     bool closeListeners(void) throw();
 
-    // aux methods
-    static unsigned long hashStr(std::string const &str);
-
     // exceptions
 #if 0
   class EpollCreateException : public std::exception {

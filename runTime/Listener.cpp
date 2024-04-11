@@ -11,7 +11,7 @@
 
 Listener::Listener(std::string const &host, std::string const &port)
     : APollable(Listener::getEpollEventStruct()), host(host),
-      port(atoi(port.c_str())), hostPortHash(RunTime::hashStr(host + port)) {
+      port(atoi(port.c_str())), hostPortHash(Listener::hashStr(host + port)) {
 
     const int                val = 1;
     const struct sockaddr_in conf = {
@@ -76,6 +76,17 @@ void Listener::handlePollin(void) {
     runTime->clientPool.push_back(newClient);
 
     return;
+}
+
+unsigned long Listener::hashStr(std::string const &str) {
+    unsigned long hash = 5318; // magic number;
+    char          c;
+
+    for (size_t i = 0; i < str.length(); i++) {
+        c = str[i];
+        hash = ((hash << 5) + hash) + c; // isso é: hash * 33 + c
+    }
+    return hash;
 }
 
 struct epoll_event Listener::getEpollEventStruct(void) const throw() {

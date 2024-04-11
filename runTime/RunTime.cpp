@@ -41,7 +41,7 @@ inline int RunTime::getEpollInstance() const throw() {
 // initialization //
 
 int RunTime::addListener(std::string const &host, std::string const &port) {
-    unsigned long hash = RunTime::hashStr(host + port);
+    unsigned long hash = Listener::hashStr(host + port);
     Listener     *newListener;
 
     for (size_t i = 0; i < this->listenerPool.size(); i++) {
@@ -161,17 +161,6 @@ bool RunTime::closeListeners(void) throw() {
     }
 
     return (true);
-}
-
-unsigned long RunTime::hashStr(std::string const &str) {
-    unsigned long hash = 5318; // magic number;
-    char          c;
-
-    for (size_t i = 0; i < str.length(); i++) {
-        c = str[i];
-        hash = ((hash << 5) + hash) + c; // isso é: hash * 33 + c
-    }
-    return hash;
 }
 
 #if 0

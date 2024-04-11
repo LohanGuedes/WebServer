@@ -24,6 +24,9 @@ class Listener : public APollable {
     void                       listen(void) const;
     void                       handlePollin(void);
 
+    // aux methods
+    static unsigned long hashStr(std::string const &str);
+
     // fields
     const std::string   host;
     const int           port;
