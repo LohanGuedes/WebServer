@@ -8,18 +8,18 @@
 #include <vector>
 
 class INode {
-public:
-  virtual std::string token_literal();
+  public:
+    virtual std::string token_literal();
 };
 
 class IStatement : public INode {
-public:
-  void statement_node();
+  public:
+    void statement_node();
 };
 
 class IExpression : public INode {
-public:
-  void expression_node();
+  public:
+    void expression_node();
 };
 
 #endif // !IAST_HPP

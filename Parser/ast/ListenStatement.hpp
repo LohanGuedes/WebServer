@@ -6,14 +6,26 @@
 #include "Ast.hpp"
 #include <string>
 
+/* ListenStatement references the Listen rule inside a server{}
+ * directive, from where a Listener will be created.
+ *
+ * Example of a ListenStatement/directive:
+ * Listen <string(<HOST>:<PORT>)>;
+ *
+ * ListenStatement {
+ *  .token = token_type::listen
+ *  .host  = std::string("<HOST/URL>")
+ *  .port  = std::string("<PORT>")
+ * }
+ */
 class ListenStatement {
-public:
-  Token token; // see token_type::listen
-  Identifier *name;
-  /* TODO
-   * Expression value; */
-  std::string token_literal();
-  void statement_node();
+  public:
+    Token       token;
+    Identifier *host_port; // <URL>:<PORT>
+    std::string token_literal();
+    void        statement_node();
+
+  private:
 };
 
 #endif // !LISTEN_STATEMENT

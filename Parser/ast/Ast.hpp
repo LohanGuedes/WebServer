@@ -4,19 +4,15 @@
 
 #include "./IAst.hpp"
 
-/* vaitomarnocusaiago n aguento mais codar cpp */
-class ListenStatement {
-public:
-  Token tok;
-  IExpression value;
-};
-
+/* ServerConfig class references the whole configure found inside
+ * the "nginx.conf" file (a small subset anyways).
+ */
 class ServerConfig {
-private:
-  std::vector<IStatement> statements;
+  private:
+    std::vector<IStatement> statements;
 
-public:
-  std::string token_literal();
+  public:
+    std::string token_literal();
 };
 
 #endif // !AST_HPP

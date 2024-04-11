@@ -3,5 +3,5 @@
 void ListenStatement::statement_node() { return; }
 
 std::string ListenStatement::token_literal() {
-  return this->token.get_literal();
+    return this->token.get_literal();
 }
