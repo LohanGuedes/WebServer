@@ -7,17 +7,17 @@
 #include <string>
 
 class Parser {
-public:
-  Parser(Lexer *);
-  Parser(std::string);
-  ServerConfig ParseConfig();
+  public:
+    Parser(Lexer *);
+    Parser(std::string);
+    ServerConfig *ParseConfig();
 
-private:
-  Lexer *lexer;
-  void next_token();
+  private:
+    Lexer *lexer;
+    void   next_token();
 
-  Token current_token;
-  Token peer_token;
+    Token current_token;
+    Token peer_token;
 };
 
 #endif // !PARSER

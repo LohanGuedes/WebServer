@@ -8,11 +8,10 @@
  * the "nginx.conf" file (a small subset anyways).
  */
 class ServerConfig {
-  private:
-    std::vector<IStatement> statements;
-
   public:
-    std::string token_literal();
+    std::vector<IStatement *> statements;
+    std::string               token_literal();
+    int                       statements_len();
 };
 
 #endif // !AST_HPP
