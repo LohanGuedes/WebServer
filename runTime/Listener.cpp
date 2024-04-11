@@ -8,14 +8,14 @@
 #include <sys/epoll.h>
 #include <sys/socket.h>
 
-Listener::Listener(std::string address, int port)
-    : APollable(Listener::getEpollEventStruct()), address(address), port(port) {
+Listener::Listener(std::string host, int port)
+    : APollable(Listener::getEpollEventStruct()), host(host), port(port) {
 
-    const int val = 1;
+    const int                val = 1;
     const struct sockaddr_in conf = {
         .sin_family = AF_INET,
         .sin_port = ntohs(port),
-        .sin_addr = {.s_addr = inet_addr(address.c_str())},
+        .sin_addr = {.s_addr = inet_addr(host.c_str())},
         .sin_zero = {0}};
 
     // create the socket
@@ -36,9 +36,9 @@ Listener::Listener(std::string address, int port)
 }
 
 Listener::~Listener(void) {
-	if (this->_fd != -1)
-		close(this->_fd);
-	return ;
+    if (this->_fd != -1)
+        close(this->_fd);
+    return;
 }
 
 void Listener::handlePoll(epoll_event_bitflag bitflag) {
@@ -61,8 +61,8 @@ void Listener::listen(void) const {
 
 void Listener::handlePollin(void) {
     RunTime *const runTime = RunTime::getInstance();
-    const Client *newClient;
-    const int fd =
+    const Client  *newClient;
+    const int      fd =
         accept(*this->fd_ptr, NULL,
                NULL); // fill these null pointers to get info on the peer socket
     if (fd < 0) {
