@@ -2,24 +2,23 @@
 #include "APollable.hpp"
 #include <sys/epoll.h>
 
-Client::Client(int fd) : APollable(this->getEpollEventStruct()) {
-  this->_fd = fd;
+Client::Client(int const fd) : APollable(this->getEpollEventStruct()) {
+    this->_fd = fd;
 }
 
 Client::~Client(void) {}
 
-void Client::handlePoll(epoll_event_bitflag bitflag) {
-  (void)bitflag;
-  if (bitflag & EPOLLIN) {
-    Logger::log(LOG_WARNING, "todo: handlePoll for Client");
+void Client::handlePoll(epoll_event_bitflag const bitflag) {
+    if (bitflag & EPOLLIN) {
+        Logger::log(LOG_WARNING, "todo: handle Pollin for Client");
+        return;
+    }
     return;
-  }
-  return;
 }
 
 struct epoll_event Client::getEpollEventStruct(void) const throw() {
-  return ((const epoll_event){
-      .events = EPOLLIN | EPOLLOUT | EPOLLET,
-      .data = {.ptr = (void *)this},
-  });
+    return ((const epoll_event){
+        .events = EPOLLIN | EPOLLOUT | EPOLLET,
+        .data = {.ptr = (void *)this},
+    });
 }

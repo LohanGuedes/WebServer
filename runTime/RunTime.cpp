@@ -137,24 +137,28 @@ bool RunTime::addToEpoll(const APollable *newInstance) throw() {
 }
 
 bool RunTime::checkEpoll(int checkType) const throw() {
-    Logger::log(LOG_INFO, "Entrou na checkEpoll");
     std::vector<struct epoll_event>            events(this->epollCount);
     std::vector<struct epoll_event>::size_type i = 0;
-    APollable                                 *extractedData;
-    std::stringstream                          ss;
 
-    ss << "O valor de i é " << checkType;
-    Logger::log(LOG_INFO, ss.str());
+    // debug
+    switch (checkType) {
+    case (NONBLOCKING_CHECK):
+        Logger::log(LOG_WARNING, "Non-blocking check on epoll");
+        break;
+    case (BLOCKING_CHECK):
+        Logger::log(LOG_WARNING, "Blocking check on epoll");
+        break;
+    }
+    // end debug
     const int loop_ceiling = epoll_wait(this->_epollInstance, &events.at(0),
                                         this->epollCount, checkType);
     if (loop_ceiling < 0) {
         return (false);
     }
-    Logger::log(LOG_INFO, "Passou do epoll_wait");
     while (i < (std::vector<struct epoll_event>::size_type)loop_ceiling) {
         //              c++ moment KEKW
-        extractedData = reinterpret_cast<APollable *>(events[i].data.ptr);
-        extractedData->handlePoll(events[i].events);
+        reinterpret_cast<APollable *>(events[i].data.ptr)
+            ->handlePoll(events[i].events);
         i++;
     }
     return (true);

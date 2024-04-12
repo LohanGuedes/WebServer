@@ -1,5 +1,4 @@
 #pragma once
-#include <sys/epoll.h>
 #ifndef LISTENER_HPP
 #define LISTENER_HPP
 
@@ -7,7 +6,9 @@
 #include "ServerConfig.hpp"
 #include <arpa/inet.h>
 #include <exception>
+#include <netdb.h>
 #include <netinet/in.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
@@ -26,6 +27,7 @@ class Listener : public APollable {
 
     // aux methods
     static unsigned long hashStr(std::string const &str);
+    bool                 resolveAddr(struct sockaddr_in *ret) const throw();
 
     // fields
     const std::string   host;
@@ -33,7 +35,7 @@ class Listener : public APollable {
     const unsigned long hostPortHash;
 
 #if 0
-		std::vector<ServerConfig>		configPool;
+		std::vector<ServerProps>		propsPool;
 #endif
 
     // Exceptions

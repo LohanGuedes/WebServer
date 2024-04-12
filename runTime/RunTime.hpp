@@ -23,6 +23,9 @@ class RunTime {
     std::list<Client const *>     clientPool;
     unsigned int                  epollCount;
 
+    // const variables
+    // const unsigned long int socketBuffSize;
+
     // getters / setters
     inline int getEpollInstance() const throw();
     int addListener(std::string const &host, std::string const &port) throw();
