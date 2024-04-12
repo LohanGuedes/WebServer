@@ -113,9 +113,11 @@ bool Listener::resolveAddr(struct sockaddr_in *result) const throw() {
         if (it->ai_addrlen == sizeof(struct sockaddr_in) &&
             it->ai_family == AF_INET && it->ai_socktype == SOCK_STREAM) {
             *result = *reinterpret_cast<struct sockaddr_in *>(it->ai_addr);
+            freeaddrinfo(head);
             return (true);
         }
     }
+    freeaddrinfo(head);
     return (false);
 }
 
