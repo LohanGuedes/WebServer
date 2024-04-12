@@ -1,7 +1,6 @@
 #include "Listener.hpp"
 #include "Logger.hpp"
 #include "RunTime.hpp"
-#include <cstdlib>
 #include <sys/epoll.h>
 #include <vector>
 

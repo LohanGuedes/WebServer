@@ -1,18 +1,5 @@
 #include "MultipartRequest.hpp"
 
-MultipartRequest::MultipartRequest(void)
-{
-}
+MultipartRequest::MultipartRequest(void) : AHttpRequest() {}
 
-MultipartRequest::MultipartRequest(MultipartRequest const &cpy)
-{
-}
-
-MultipartRequest::~MultipartRequest(void)
-{
-}
-
-MultipartRequest	&MultipartRequest::operator=(MultipartRequest const &rhs)
-{
-}
-
+MultipartRequest::~MultipartRequest(void) {}

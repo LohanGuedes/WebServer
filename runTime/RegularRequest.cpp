@@ -1,18 +1,5 @@
 #include "RegularRequest.hpp"
 
-RegularRequest::RegularRequest(void)
-{
-}
+RegularRequest::RegularRequest(void) : AHttpRequest() {}
 
-RegularRequest::RegularRequest(RegularRequest const &cpy)
-{
-}
-
-RegularRequest::~RegularRequest(void)
-{
-}
-
-RegularRequest	&RegularRequest::operator=(RegularRequest const &rhs)
-{
-}
-
+RegularRequest::~RegularRequest(void) {}

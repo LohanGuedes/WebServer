@@ -1,13 +1,12 @@
+#pragma once
 #ifndef REGULARREQUEST_HPP
-# define REGULARREQUEST_HPP
+#define REGULARREQUEST_HPP
+#include "AHttpRequest.hpp"
 
-class RegularRequest
-{
-	public:
-		RegularRequest(void);
-		RegularRequest(RegularRequest const &cpy);
-		~RegularRequest(void);
-		RegularRequest&	operator=(RegularRequest const &rhs);
+class RegularRequest : public AHttpRequest {
+  public:
+    RegularRequest(void);
+    ~RegularRequest(void);
 };
 
 #endif
