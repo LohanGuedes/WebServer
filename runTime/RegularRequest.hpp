@@ -7,6 +7,7 @@ class RegularRequest : public AHttpRequest {
   public:
     RegularRequest(Client const *const clientInstance);
     ~RegularRequest(void);
+    virtual void processRequest(void) throw();
 };
 
 #endif // !REGULARREQUEST_HPP

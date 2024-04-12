@@ -1,4 +1,6 @@
 #include "RunTime.hpp"
+#include "Client.hpp"
+#include "Listener.hpp"
 
 // Static variables have to be initialized like this
 RunTime *RunTime::_instance = NULL;

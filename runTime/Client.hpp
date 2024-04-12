@@ -2,8 +2,16 @@
 #define CLIENT_HPP
 #include "AHttpRequest.hpp"
 #include "APollable.hpp"
+#include "CgiRequest.hpp"
 #include "Logger.hpp"
+#include "MultipartRequest.hpp"
+#include "RegularRequest.hpp"
+#include <cstdlib>
+#include <new>
 #include <sys/epoll.h>
+#include <sys/socket.h>
+
+class RunTime;
 
 class Client : public APollable {
   public:
@@ -11,7 +19,7 @@ class Client : public APollable {
     virtual ~Client(void);
     virtual void               handlePoll(epoll_event_bitflag const bitflag);
     virtual struct epoll_event getEpollEventStruct(void) const throw();
-    AHttpRequest const        *parseHeader(void);
+    AHttpRequest              *parseHeader(void);
 
     AHttpRequest const *request;
 #if 0

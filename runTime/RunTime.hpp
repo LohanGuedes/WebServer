@@ -1,8 +1,8 @@
 #ifndef RUNTIME_HPP
 #define RUNTIME_HPP
+#pragma once
+#include "AHttpRequest.hpp"
 #include "APollable.hpp"
-#include "Client.hpp"
-#include "Listener.hpp"
 #include "Logger.hpp"
 #include <iostream>
 #include <list>
@@ -15,6 +15,8 @@
 #define NONBLOCKING_CHECK 0
 
 class Listener;
+class AHttpRequest;
+class Client;
 
 class RunTime {
   public:
@@ -25,7 +27,7 @@ class RunTime {
 
     // variables
     std::vector<Listener const *> listenerPool;
-    std::vector<int>              requestPool;
+    std::vector<AHttpRequest *>   requestPool;
     std::list<Client const *>     clientPool;
     unsigned int                  epollCount;
 
@@ -70,4 +72,4 @@ class RunTime {
     int             _epollInstance;
 };
 
-#endif // RunTime
+#endif // !RUNTIME_HPP
