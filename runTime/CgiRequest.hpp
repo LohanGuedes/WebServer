@@ -5,7 +5,7 @@
 
 class CgiRequest : public AHttpRequest {
   public:
-    CgiRequest(void);
+    CgiRequest(Client const *const clientInstance);
     ~CgiRequest(void);
 };
 

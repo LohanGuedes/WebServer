@@ -5,7 +5,7 @@
 
 class RegularRequest : public AHttpRequest {
   public:
-    RegularRequest(void);
+    RegularRequest(Client const *const clientInstance);
     ~RegularRequest(void);
 };
 

@@ -1,5 +1,7 @@
 #include "RegularRequest.hpp"
+#include "AHttpRequest.hpp"
 
-RegularRequest::RegularRequest(void) : AHttpRequest() {}
+RegularRequest::RegularRequest(Client const *const clientInstance)
+    : AHttpRequest(clientInstance) {}
 
 RegularRequest::~RegularRequest(void) {}

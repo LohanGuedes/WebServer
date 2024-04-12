@@ -1,12 +1,16 @@
 #ifndef AHTTPREQUEST_HPP
 #define AHTTPREQUEST_HPP
 
+class Client; // forward declaration
+
 class AHttpRequest {
   public:
-    AHttpRequest(void);
+    AHttpRequest(Client const *const clientInstance);
     virtual ~AHttpRequest(void);
+    virtual void processRequest(void) throw() = 0;
 
-  private:
+  protected:
+    Client const *const _clientInstance;
 };
 
 #endif

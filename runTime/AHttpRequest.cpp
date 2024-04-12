@@ -1,5 +1,6 @@
 #include "AHttpRequest.hpp"
 
-AHttpRequest::AHttpRequest(void) {}
+AHttpRequest::AHttpRequest(Client const *const clientInstance)
+    : _clientInstance(clientInstance) {}
 
 AHttpRequest::~AHttpRequest(void) {}
