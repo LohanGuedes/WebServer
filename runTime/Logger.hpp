@@ -1,6 +1,6 @@
-#pragma once
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
+#pragma once
 #include <ctime>
 #include <iostream>
 
@@ -11,10 +11,10 @@
 enum LOG_LEVEL { LOG_INFO, LOG_ERROR, LOG_WARNING };
 
 class Logger {
-public:
-  Logger(void);
-  ~Logger(void);
-  static void log(LOG_LEVEL, const std::string) throw();
+  public:
+    Logger(void);
+    ~Logger(void);
+    static void log(LOG_LEVEL, const std::string) throw();
 };
 
-#endif
+#endif // ! LOGGER_HPP

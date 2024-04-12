@@ -8,4 +8,4 @@ class MultipartRequest : public AHttpRequest {
     ~MultipartRequest(void);
 };
 
-#endif
+#endif // !MULTIPARTREQUEST_HPP

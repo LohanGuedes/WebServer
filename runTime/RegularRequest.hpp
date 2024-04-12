@@ -9,4 +9,4 @@ class RegularRequest : public AHttpRequest {
     ~RegularRequest(void);
 };
 
-#endif
+#endif // !REGULARREQUEST_HPP

@@ -3,6 +3,7 @@
 #include "AHttpRequest.hpp"
 #include "APollable.hpp"
 #include "Logger.hpp"
+#include <sys/epoll.h>
 
 class Client : public APollable {
   public:

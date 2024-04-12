@@ -1,17 +1,4 @@
 #include "Listener.hpp"
-#include "APollable.hpp"
-#include "Client.hpp"
-#include "Logger.hpp"
-#include "RunTime.hpp"
-#include <arpa/inet.h>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <list>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/epoll.h>
-#include <sys/socket.h>
 
 Listener::Listener(std::string const &host, std::string const &port)
     : APollable(Listener::getEpollEventStruct()), host(host),

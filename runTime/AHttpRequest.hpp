@@ -13,4 +13,4 @@ class AHttpRequest {
     Client const *const _clientInstance;
 };
 
-#endif
+#endif // !AHTTPREQUEST_HPP

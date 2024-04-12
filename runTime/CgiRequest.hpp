@@ -9,4 +9,4 @@ class CgiRequest : public AHttpRequest {
     ~CgiRequest(void);
 };
 
-#endif
+#endif // !CGIREQUEST_HPP

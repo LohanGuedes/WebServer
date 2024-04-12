@@ -1,6 +1,4 @@
 #include "Client.hpp"
-#include "APollable.hpp"
-#include <sys/epoll.h>
 
 Client::Client(int const fd) : APollable(this->getEpollEventStruct()) {
     this->_fd = fd;

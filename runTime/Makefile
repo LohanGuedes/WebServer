@@ -6,6 +6,10 @@ SRCS =	main.cpp \
 		RunTime.cpp \
 		Listener.cpp \
 		Client.cpp \
+		AHttpRequest.cpp \
+		RegularRequest.cpp \
+		MultipartRequest.cpp \
+		CgiRequest.cpp \
 
 
 DEPS =	$(SRCS) \
@@ -14,6 +18,10 @@ DEPS =	$(SRCS) \
 		APollable.hpp \
 		Listener.hpp \
 		Client.hpp \
+		AHttpRequest.hpp \
+		RegularRequest.hpp \
+		MultipartRequest.hpp \
+		CgiRequest.hpp \
 
 CC = c++
 

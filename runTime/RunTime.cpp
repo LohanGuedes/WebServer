@@ -1,11 +1,4 @@
 #include "RunTime.hpp"
-#include "APollable.hpp"
-#include "Listener.hpp"
-#include "Logger.hpp"
-#include <new>
-#include <sstream>
-#include <sys/epoll.h>
-#include <vector>
 
 // Static variables have to be initialized like this
 RunTime *RunTime::_instance = NULL;
