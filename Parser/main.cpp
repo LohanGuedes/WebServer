@@ -5,12 +5,17 @@
 #include <string>
 #include <utility>
 
+#include "../runTime/Logger.hpp"
 #include "Parser.hpp"
 #include "ast/Ast.hpp"
 #include "ast/IAst.hpp"
 #include "ast/ListenStatement.hpp"
 
 void test_listen_statements(void) {
+    Logger::log(LOG_ERROR, "Logging error on macos");
+    Logger::log(LOG_INFO, "Logging info on macos");
+    Logger::log(LOG_WARNING, "Logging warning on macos");
+
     std::string input = "\
     listen localhost:1337;\
     listen localhost:1234;\
