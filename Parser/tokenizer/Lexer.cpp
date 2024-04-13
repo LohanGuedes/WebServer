@@ -28,23 +28,23 @@ Token *Lexer::next_token() {
 
     switch (this->_byte) {
     case ';':
-        tok->set_type(token_type::semicolon);
+        tok->set_type(SEMICOLON);
         tok->set_literal(std::string(1, this->_byte));
         break;
     case '{':
-        tok->set_type(token_type::lbracket);
+        tok->set_type(LBRACKET);
         tok->set_literal(std::string(1, this->_byte));
         break;
     case '}':
-        tok->set_type(token_type::rbracket);
+        tok->set_type(RBRACKET);
         tok->set_literal(std::string(1, this->_byte));
         break;
     case ',':
-        tok->set_type(token_type::comma);
+        tok->set_type(COMMA);
         tok->set_literal(std::string(1, this->_byte));
         break;
     case '\0':
-        tok->set_type(token_type::eof);
+        tok->set_type(T_EOF);
         tok->set_literal(std::string(1, this->_byte));
         break;
     default:
@@ -54,7 +54,7 @@ Token *Lexer::next_token() {
             return tok;
         } else {
             delete tok;
-            return new Token(token_type::illegal, std::string(1, this->_byte));
+            return new Token(ILLEGAL, std::string(1, this->_byte));
         }
     }
 

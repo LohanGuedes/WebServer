@@ -25,39 +25,39 @@ bool Token::is_letter(char ch) {
 token_type Token::get_identifier(std::string ident) {
     /* Keyword check -> C++98 static hashmaps can be a hassle */
     if (ident == "server") {
-        return token_type::server;
+        return SERVER;
     }
     if (ident == "listen") {
-        return token_type::listen;
+        return LISTEN;
     }
     if (ident == "server_name") {
-        return token_type::server_name;
+        return SERVER_NAME;
     }
     if (ident == "location") {
-        return token_type::location;
+        return LOCATION;
     }
     if (ident == "root") {
-        return token_type::root;
+        return ROOT;
     }
     if (ident == "error_page") {
-        return token_type::error_page;
+        return ERROR_PAGE;
     }
     if (ident == "auto_index") {
-        return token_type::auto_index;
+        return AUTO_INDEX;
     }
     if (ident == "client_max_body_size") {
-        return token_type::client_max_body_size;
+        return CLIENT_MAX_BODY_SIZE;
     }
     if (ident == "cgi_extension") {
-        return token_type::cgi_extension;
+        return CGI_EXTENSION;
     }
     if (ident == "return") {
-        return token_type::ret;
+        return RET;
     }
     if (ident == "allow_methods") {
-        return token_type::allow_methods;
+        return ALLOW_METHODS;
     }
 
     // User defined identifier
-    return token_type::identifier;
+    return IDENTIFIER;
 }

@@ -2,56 +2,55 @@
 
 #include <string>
 
-enum class token_type {
+enum token_type {
+    // DELIMITERS
+    COMMA,
+    SEMICOLON,
+    LBRACKET,
+    RBRACKET,
 
-  // delimiters
-  comma,
-  semicolon,
-  lbracket,
-  rbracket,
+    // NOTE: USER DEFINED IDENTIFIER
+    IDENTIFIER,
 
-  // NOTE: user defined identifier
-  identifier,
+    // KEYWORDS
+    SERVER,
+    LISTEN,
+    SERVER_NAME,
+    LOCATION,
+    ROOT,
+    ERROR_PAGE,
+    AUTO_INDEX,
+    CLIENT_MAX_BODY_SIZE,
+    CGI_EXTENSION,
+    ALLOW_METHODS,
+    RET, // RETURN KEYWORD
 
-  // keywords
-  server,
-  listen,
-  server_name,
-  location,
-  root,
-  error_page,
-  auto_index,
-  client_max_body_size,
-  cgi_extension,
-  allow_methods,
-  ret, // return keyword
+    // HTTP ALLOWED METHODS
+    M_GET,
+    M_POST,
+    M_DELETE,
 
-  // http allowed methods
-  m_get,
-  m_post,
-  m_delete,
-
-  eof,
-  illegal,
+    T_EOF,
+    ILLEGAL,
 };
 
 class Token {
-public:
-  void set_literal(std::string);
-  void set_type(token_type);
+  public:
+    void set_literal(std::string);
+    void set_type(token_type);
 
-  token_type get_type();
-  std::string get_literal();
+    token_type  get_type();
+    std::string get_literal();
 
-  Token(token_type, std::string);
-  Token();
-  ~Token();
+    Token(token_type, std::string);
+    Token();
+    ~Token();
 
-  static bool is_letter(char);
+    static bool is_letter(char);
 
-  static token_type get_identifier(std::string);
+    static token_type get_identifier(std::string);
 
-private:
-  std::string _literal;
-  token_type _type;
+  private:
+    std::string _literal;
+    token_type  _type;
 };

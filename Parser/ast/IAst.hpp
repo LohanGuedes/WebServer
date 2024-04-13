@@ -9,17 +9,24 @@
 
 class INode {
   public:
-    virtual std::string token_literal();
+    virtual std::string token_literal() = 0;
+    virtual ~INode() { return; };
 };
 
 class IStatement : public INode {
   public:
-    void statement_node();
+    virtual void statement_node() = 0;
+
+    // Implements INode
+    virtual std::string token_literal() = 0;
 };
 
 class IExpression : public INode {
   public:
-    void expression_node();
+    virtual void expression_node() = 0;
+
+    // Implements INode
+    virtual std::string token_literal() = 0;
 };
 
 #endif // !IAST_HPP

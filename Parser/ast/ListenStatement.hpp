@@ -1,4 +1,5 @@
 #pragma once
+#include "IAst.hpp"
 #include "Identifier.hpp"
 #ifndef LISTEN_STATEMENT
 
@@ -18,12 +19,14 @@
  *  .port  = std::string("<PORT>")
  * }
  */
-class ListenStatement {
+class ListenStatement : public IStatement {
   public:
-    Token       token;
-    Identifier *host_port; // <URL>:<PORT>
-    std::string token_literal();
-    void        statement_node();
+    Token      token;
+    Identifier host_port; // <URL>:<PORT>
+    // Implementation for IStatement & INode
+    virtual std::string token_literal();
+    void                statement_node();
+    ListenStatement(void);
 
   private:
 };
