@@ -36,12 +36,15 @@ class Listener : public APollable {
 
     // aux methods
     static unsigned long hashStr(std::string const &str);
-    bool                 resolveAddr(struct sockaddr_in *ret) const throw();
+    bool resolveAddr(struct sockaddr_storage *ret) const throw();
 
-    // fields
+    // const fields
     const std::string   host;
     const int           port;
     const unsigned long hostPortHash;
+
+    // non_const fields
+    struct sockaddr_storage sockAddrInfo;
 
 #if 0
 		std::vector<ServerProps>		propsPool;
