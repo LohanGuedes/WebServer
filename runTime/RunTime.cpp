@@ -102,7 +102,7 @@ bool RunTime::startListeners(void) const {
 
     for (std::vector<const Listener *>::size_type i = 0; i < size; i++) {
         this->listenerPool[i]->listen();
-        ss.clear();
+        ss.str("");
         ss << "Starting Listener host [" << this->listenerPool[i]->host
            << "] and port [" << this->listenerPool[i]->port << "]";
         Logger::log(LOG_INFO, ss.str());
