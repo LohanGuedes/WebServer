@@ -1,5 +1,6 @@
 #include "Listener.hpp"
 #include <netinet/in.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 
 Listener::Listener(std::string const &host, std::string const &port)
@@ -61,10 +62,11 @@ void Listener::handlePollin(void) {
     RunTime *const runTime = RunTime::getInstance();
     const Client  *newClient;
     const int      fd =
-        accept(*this->fd_ptr, NULL,
-               NULL); // fill these null pointers to get info on the peer socket
+        accept4(*this->fd_ptr, NULL, NULL,
+                SOCK_NONBLOCK | SOCK_CLOEXEC); // fill these null pointers to
+                                               // get info on the peer socket
     if (fd < 0) {
-        Logger::log(LOG_ERROR, "Failure on Listener handlePollin in accept()");
+        Logger::log(LOG_ERROR, "Failure on Listener::handlePollin -> accept()");
         return;
     }
     newClient = new Client(fd);

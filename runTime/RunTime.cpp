@@ -160,9 +160,9 @@ bool RunTime::checkEpoll(int checkType) const throw() {
 }
 
 bool RunTime::processRequests(void) {
-    std::vector<int>::size_type size = this->requestPool.size();
-    for (std::vector<int>::size_type i = 0; i < size; i++) {
-        std::cout << "request " << i << "sendo processada" << std::endl;
+    std::vector<AHttpRequest *>::size_type size = this->requestPool.size();
+    for (std::vector<AHttpRequest *>::size_type i = 0; i < size; i++) {
+        this->requestPool[i]->processRequest();
     }
     return (true);
 }

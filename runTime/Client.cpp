@@ -9,14 +9,21 @@ Client::~Client(void) {}
 
 void Client::handlePoll(epoll_event_bitflag const bitflag) {
     AHttpRequest *req;
-    char          buff[1000]; // just for test
-    RunTime      *rt;
+    //    char          buff[1000]; // just for test
+    RunTime *rt;
 
     if (bitflag & EPOLLIN) {
         Logger::log(LOG_WARNING, "Mocked Pollin on Client");
         req = this->parseHeader();
+        if (!req) {
+            ; // send bad request response
+        }
+#if 0
         while (recv(this->_fd, buff, sizeof(buff), 0) != 0)
-            ;
+            ; // just to empty the buffer and trigger a pollout.
+			  // the above thing is an error because emptying the buffer
+			  // triggers another EPOLLIN
+#endif
         rt = RunTime::getInstance();
         rt->requestPool.push_back(req);
         return;
@@ -27,8 +34,9 @@ void Client::handlePoll(epoll_event_bitflag const bitflag) {
     return;
 }
 
+// TODO: Implement this header parsing
 AHttpRequest *Client::parseHeader(void) {
-    const int     numb = (rand() + 1) / 100;
+    const int     numb = (rand() + 1) % 100;
     AHttpRequest *req;
 
     Logger::log(LOG_WARNING, "Mocked parseHeader on Client");
