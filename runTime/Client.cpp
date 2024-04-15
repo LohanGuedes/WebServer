@@ -1,5 +1,9 @@
 #include "Client.hpp"
+#include "Logger.hpp"
 #include "RunTime.hpp"
+#include <algorithm>
+#include <cstdlib>
+#include <sys/epoll.h>
 
 Client::Client(int const fd) : APollable(this->getEpollEventStruct()) {
     this->_fd = fd;
@@ -9,21 +13,26 @@ Client::~Client(void) {}
 
 void Client::handlePoll(epoll_event_bitflag const bitflag) {
     AHttpRequest *req;
-    //    char          buff[1000]; // just for test
-    RunTime *rt;
+    RunTime      *rt;
 
+    if (bitflag & EPOLLRDHUP) {
+        Logger::log(LOG_ERROR, "HANGUP OCCURED");
+        // TODO: Implementar um RunTime::deleteRequest
+    }
     if (bitflag & EPOLLIN) {
+        // TODO: existe a possibilidade do usuário mandar exatamente o tamanho
+        // do header na request, então esvaziaria o buffer interno e quando
+        // chegasse o resto da request ele avisaria como um novo POLLIN.
+        // Dessa forma ele criaria duas request (e vazaria a primeira).
+        // Para evitar esse caso, a gente precisa checar se já existe uma
+        // request pra esse client, caso exista, ligar uma flag de leitura
+        // disponível na request, pra essa leitura ser processada pelo método de
+        // handle da request (que o mesmo vai checar essa flag).
         Logger::log(LOG_WARNING, "Mocked Pollin on Client");
         req = this->parseHeader();
         if (!req) {
             ; // send bad request response
         }
-#if 0
-        while (recv(this->_fd, buff, sizeof(buff), 0) != 0)
-            ; // just to empty the buffer and trigger a pollout.
-			  // the above thing is an error because emptying the buffer
-			  // triggers another EPOLLIN
-#endif
         rt = RunTime::getInstance();
         rt->requestPool.push_back(req);
         return;
@@ -34,8 +43,9 @@ void Client::handlePoll(epoll_event_bitflag const bitflag) {
     return;
 }
 
-// TODO: Implement this header parsing
+// TODO: Implement this header parsing. It's mocked atm
 AHttpRequest *Client::parseHeader(void) {
+    srand(time(NULL));
     const int     numb = (rand() + 1) % 100;
     AHttpRequest *req;
 
@@ -56,7 +66,7 @@ AHttpRequest *Client::parseHeader(void) {
 
 struct epoll_event Client::getEpollEventStruct(void) const throw() {
     return ((const epoll_event){
-        .events = EPOLLIN | EPOLLOUT | EPOLLET,
+        .events = EPOLLIN | EPOLLOUT | EPOLLRDHUP | EPOLLET,
         .data = {.ptr = (void *)this},
     });
 }
