@@ -1,6 +1,12 @@
 #include "RunTime.hpp"
+#include "AHttpRequest.hpp"
+#include "APollable.hpp"
 #include "Client.hpp"
 #include "Listener.hpp"
+#include "Logger.hpp"
+#include <algorithm>
+#include <sys/epoll.h>
+#include <vector>
 
 // Static variables have to be initialized like this
 RunTime *RunTime::_instance = NULL;
@@ -131,6 +137,47 @@ bool RunTime::addToEpoll(const APollable *newInstance) throw() {
             this->epollCount++);
 }
 
+bool RunTime::deleteFromEpoll(const APollable *newInstance) throw() {
+    const struct epoll_event events = newInstance->getEpollEventStruct();
+
+    return (
+        (epoll_ctl(this->_epollInstance, EPOLL_CTL_DEL, *newInstance->fd_ptr,
+                   const_cast<struct epoll_event *>(&events)) == 0) &&
+        this->epollCount--);
+}
+
+bool RunTime::deleteClient(Client *socket) throw() {
+    std::list<Client *>::iterator         foundClient;
+    std::vector<AHttpRequest *>::iterator foundRequest;
+
+    foundClient =
+        std::find(this->clientPool.begin(), this->clientPool.end(), socket);
+    if (foundClient == this->clientPool.end()) {
+        Logger::log(LOG_ERROR, "Couldn't find the Client instance");
+        return false;
+    }
+    foundRequest = std::find(this->requestPool.begin(), this->requestPool.end(),
+                             (*foundClient)->request);
+    if (foundRequest == this->requestPool.end()) {
+        Logger::log(LOG_ERROR, "Couldn't find the request instance");
+    }
+
+    // TODO: GOTTA REMOVE THE REQUEST FROM THE REQUESTPOOL
+
+    // remove from epoll
+    if (deleteFromEpoll(*foundClient) != true) {
+        Logger::log(LOG_WARNING, "Error on deleting Client from epoll");
+    }
+
+    // remove the request from the requestPool
+    this->requestPool.erase(foundRequest);
+    // delete the object
+    delete *foundClient;
+    // erase the Client from the clientPool
+    this->clientPool.erase(foundClient);
+    return (true);
+}
+
 bool RunTime::checkEpoll(int checkType) const throw() {
     std::vector<struct epoll_event>            events(this->epollCount);
     std::vector<struct epoll_event>::size_type i = 0;
@@ -182,6 +229,28 @@ bool RunTime::closeListeners(void) throw() {
     }
 
     return (true);
+}
+
+void RunTime::clearRequests(void) throw() {
+    std::vector<AHttpRequest *>::iterator       it;
+    const std::vector<AHttpRequest *>::iterator end = this->requestPool.end();
+
+    for (it = this->requestPool.begin(); it != end; ++it) {
+        delete *it;
+    }
+    // TODO: Tem certeza que o RunTime que tem que deletar cada request?
+    return;
+}
+
+bool RunTime::removeRequest(AHttpRequest *find) throw() {
+    std::vector<AHttpRequest *>::iterator found;
+
+    found = std::find(this->requestPool.begin(), this->requestPool.end(), find);
+    if (found == this->requestPool.end()) {
+        return false;
+    }
+    this->requestPool.erase(found);
+    return true;
 }
 
 #if 0

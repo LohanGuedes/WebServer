@@ -28,7 +28,7 @@ class RunTime {
     // variables
     std::vector<Listener const *> listenerPool;
     std::vector<AHttpRequest *>   requestPool;
-    std::list<Client const *>     clientPool;
+    std::list<Client *>           clientPool;
     unsigned int                  epollCount;
 
     // const variables
@@ -48,12 +48,16 @@ class RunTime {
     bool addListenersToEpoll(void) throw();
 
     // event loop
-    bool addToEpoll(const APollable *socket) throw();
+    bool addToEpoll(APollable const *socket) throw();
+    bool deleteFromEpoll(const APollable *newInstance) throw();
+    bool deleteClient(Client *socket) throw();
     bool checkEpoll(int checkType) const throw();
     bool processRequests(void);
 
     // cleanup
     bool closeListeners(void) throw();
+    void clearRequests(void) throw();
+    bool removeRequest(AHttpRequest *find) throw();
 
     // exceptions
 #if 0

@@ -60,7 +60,7 @@ void Listener::listen(void) const {
 
 void Listener::handlePollin(void) {
     RunTime *const runTime = RunTime::getInstance();
-    const Client  *newClient;
+    Client        *newClient;
     const int      fd =
         accept4(*this->fd_ptr, NULL, NULL,
                 SOCK_NONBLOCK | SOCK_CLOEXEC); // fill these null pointers to

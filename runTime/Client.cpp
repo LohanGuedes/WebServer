@@ -1,23 +1,34 @@
 #include "Client.hpp"
+#include "AHttpRequest.hpp"
 #include "Logger.hpp"
 #include "RunTime.hpp"
-#include <algorithm>
 #include <cstdlib>
 #include <sys/epoll.h>
 
-Client::Client(int const fd) : APollable(this->getEpollEventStruct()) {
+Client::Client(int const fd)
+    : APollable(this->getEpollEventStruct()), request(NULL) {
     this->_fd = fd;
 }
 
-Client::~Client(void) {}
+Client::~Client(void) {
+    if (this->request) {
+        delete this->request;
+    }
+}
 
 void Client::handlePoll(epoll_event_bitflag const bitflag) {
     AHttpRequest *req;
     RunTime      *rt;
 
     if (bitflag & EPOLLRDHUP) {
-        Logger::log(LOG_ERROR, "HANGUP OCCURED");
-        // TODO: Implementar um RunTime::deleteRequest
+        Logger::log(LOG_ERROR, "Hangup Occurred, cleaning request");
+        // delete the request from the client. -> client
+        // remove the request from the request requestPool -> rt
+        // remove the client from the epoll instance -> rt
+
+        rt = RunTime::getInstance();
+        rt->deleteClient(this);
+        return;
     }
     if (bitflag & EPOLLIN) {
         // TODO: existe a possibilidade do usuário mandar exatamente o tamanho
@@ -33,6 +44,9 @@ void Client::handlePoll(epoll_event_bitflag const bitflag) {
         if (!req) {
             ; // send bad request response
         }
+        // add request to the client
+        this->request = req;
+        // push request to be processed by runTime
         rt = RunTime::getInstance();
         rt->requestPool.push_back(req);
         return;
