@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "../runTime/Logger.hpp"
 #include "Parser.hpp"
@@ -11,14 +12,22 @@
 #include "ast/IAst.hpp"
 #include "ast/ListenStatement.hpp"
 
-void test_listen_statements(void) {
-    Logger::log(LOG_ERROR, "Logging error on macos");
-    Logger::log(LOG_INFO, "Logging info on macos");
-    Logger::log(LOG_WARNING, "Logging warning on macos");
+void check_parser_errors(Parser *parser) {
+    std::vector<std::string> errors = parser->errors;
+    if (errors.size() == 0) {
+        return;
+    }
 
+    Logger::log(LOG_ERROR, "Errors during parsing config...");
+    for (int i = 0; i < errors.size(); ++i) {
+        Logger::log(LOG_ERROR, errors[i]);
+    }
+}
+
+void test_listen_statements(void) {
     std::string input = "\
     listen localhost:1337;\
-    listen localhost:1234;\
+    listen localhost1234 bananinha;\
     listen localhost:4321;\
     ";
 
@@ -31,6 +40,9 @@ void test_listen_statements(void) {
     Lexer        *lex = new Lexer(input);
     Parser        parser = Parser(lex);
     ServerConfig *serverConf = parser.ParseConfig();
+
+    check_parser_errors(&parser);
+
     if (serverConf == NULL) {
         std::cout << "Parserconfig returned a NULL pointer. exiting."
                   << std::endl;
@@ -45,7 +57,7 @@ void test_listen_statements(void) {
     }
 
     for (int i = 0; i < serverConf->statements.size(); i++) {
-        auto             stmt = serverConf->statements[i];
+        IStatement      *stmt = serverConf->statements[i];
         ListenStatement *listenStmt = dynamic_cast<ListenStatement *>(stmt);
 
         if (listenStmt == NULL) {

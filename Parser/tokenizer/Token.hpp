@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 enum token_type {
     // DELIMITERS
@@ -31,13 +32,14 @@ enum token_type {
     M_DELETE,
 
     T_EOF,
-    ILLEGAL,
+    ILLEGAL
 };
 
 class Token {
   public:
-    void set_literal(std::string);
-    void set_type(token_type);
+    static const char *token_names[];
+    void               set_literal(std::string);
+    void               set_type(token_type);
 
     token_type  get_type();
     std::string get_literal();

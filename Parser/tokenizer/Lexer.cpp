@@ -8,7 +8,7 @@ Lexer::Lexer(const std::string file_content)
     this->read_char(); // initialize this->_read_position
 }
 
-Lexer::~Lexer() { return; };
+Lexer::~Lexer() { return; }
 
 void Lexer::read_char(void) {
     if (this->_read_position >= this->_input.length()) {

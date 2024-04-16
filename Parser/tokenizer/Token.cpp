@@ -1,5 +1,32 @@
 #include "Token.hpp"
 
+const char *Token::token_names[] = {
+    "COMMA ','",
+    "SEMICOLON ';'",
+    "LEFT-BRACKET '{'",
+    "RIGHT-BRACKET '}'",
+
+    "IDENTIFIER",
+
+    "keyword 'server'",
+    "keyword 'listen'",
+    "keyword 'server_name'",
+    "keyword 'location'",
+    "keyword 'root'",
+    "keyword 'error_page'",
+    "keyword 'auto_index'",
+    "keyword 'client_max_body_size'",
+    "keyword 'cgi_extension'",
+    "keyword 'allow_methods'",
+    "keyword 'return'",
+
+    "HTTP method 'GET'",
+    "HTTP method 'POST'",
+    "HTTP method 'DELTE'",
+    "end of file",
+    "ILLEGALTOKEN",
+};
+
 Token::Token(token_type t_type, std::string literal)
     : _literal(literal), _type(t_type) {
     return;
@@ -16,7 +43,7 @@ token_type  Token::get_type() { return this->_type; }
 
 void Token::set_type(token_type t_type) { this->_type = t_type; }
 
-// NEED UPDATE! Accept numbers and some special chars such as -> :
+// TODO: NEED UPDATE! Accept numbers and some special chars such as -> :
 bool Token::is_letter(char ch) {
     return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' ||
            ch == '/' || ch == ':' || (ch >= '0' && ch <= '9');
