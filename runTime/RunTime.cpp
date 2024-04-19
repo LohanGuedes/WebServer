@@ -150,19 +150,19 @@ bool RunTime::deleteClient(Client *socket) throw() {
     std::list<Client *>::iterator         foundClient;
     std::vector<AHttpRequest *>::iterator foundRequest;
 
+    // search for the client
     foundClient =
         std::find(this->clientPool.begin(), this->clientPool.end(), socket);
     if (foundClient == this->clientPool.end()) {
         Logger::log(LOG_ERROR, "Couldn't find the Client instance");
         return false;
     }
+    // search for the request
     foundRequest = std::find(this->requestPool.begin(), this->requestPool.end(),
                              (*foundClient)->request);
     if (foundRequest == this->requestPool.end()) {
         Logger::log(LOG_ERROR, "Couldn't find the request instance");
     }
-
-    // TODO: GOTTA REMOVE THE REQUEST FROM THE REQUESTPOOL
 
     // remove from epoll
     if (deleteFromEpoll(*foundClient) != true) {
@@ -171,10 +171,12 @@ bool RunTime::deleteClient(Client *socket) throw() {
 
     // remove the request from the requestPool
     this->requestPool.erase(foundRequest);
-    // delete the object
-    delete *foundClient;
     // erase the Client from the clientPool
     this->clientPool.erase(foundClient);
+    // delete the client object.
+    // RAII is responsible for cleaning the Request Object associated
+    // with this CLient object
+    delete *foundClient;
     return (true);
 }
 
@@ -215,6 +217,7 @@ bool RunTime::processRequests(void) {
 }
 
 // cleanup
+
 bool RunTime::closeListeners(void) throw() {
     std::stringstream                              ss;
     const std::vector<const Listener *>::size_type size =
@@ -239,6 +242,7 @@ void RunTime::clearRequests(void) throw() {
         delete *it;
     }
     // TODO: Tem certeza que o RunTime que tem que deletar cada request?
+    // TODO: Não, quem deve deletar as requests é cada Client
     return;
 }
 

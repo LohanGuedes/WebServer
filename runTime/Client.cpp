@@ -20,12 +20,12 @@ void Client::handlePoll(epoll_event_bitflag const bitflag) {
     AHttpRequest *req;
     RunTime      *rt;
 
-    if (bitflag & EPOLLRDHUP) {
+    if ((bitflag & EPOLLRDHUP) || (bitflag & EPOLLERR) ||
+        (bitflag & EPOLLHUP)) {
         Logger::log(LOG_ERROR, "Hangup Occurred, cleaning request");
         // delete the request from the client. -> client
         // remove the request from the request requestPool -> rt
         // remove the client from the epoll instance -> rt
-
         rt = RunTime::getInstance();
         rt->deleteClient(this);
         return;
