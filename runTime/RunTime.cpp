@@ -1,9 +1,10 @@
 #include "RunTime.hpp"
+#include "AHttpRequest.hpp"
 #include "APollable.hpp"
+#include "Client.hpp"
 #include "Listener.hpp"
 #include "Logger.hpp"
-#include <new>
-#include <sstream>
+#include <algorithm>
 #include <sys/epoll.h>
 #include <vector>
 
@@ -107,7 +108,7 @@ bool RunTime::startListeners(void) const {
 
     for (std::vector<const Listener *>::size_type i = 0; i < size; i++) {
         this->listenerPool[i]->listen();
-        ss.clear();
+        ss.str("");
         ss << "Starting Listener host [" << this->listenerPool[i]->host
            << "] and port [" << this->listenerPool[i]->port << "]";
         Logger::log(LOG_INFO, ss.str());
@@ -136,39 +137,94 @@ bool RunTime::addToEpoll(const APollable *newInstance) throw() {
             this->epollCount++);
 }
 
-bool RunTime::checkEpoll(int checkType) const throw() {
-    Logger::log(LOG_INFO, "Entrou na checkEpoll");
-    std::vector<struct epoll_event>            events(this->epollCount);
-    std::vector<struct epoll_event>::size_type i = 0;
-    APollable                                 *extractedData;
-    std::stringstream                          ss;
+bool RunTime::deleteFromEpoll(const APollable *newInstance) throw() {
+    const struct epoll_event events = newInstance->getEpollEventStruct();
 
-    ss << "O valor de i é " << checkType;
-    Logger::log(LOG_INFO, ss.str());
-    const int loop_ceiling = epoll_wait(this->_epollInstance, &events.at(0),
-                                        this->epollCount, checkType);
-    if (loop_ceiling < 0) {
+    return (
+        (epoll_ctl(this->_epollInstance, EPOLL_CTL_DEL, *newInstance->fd_ptr,
+                   const_cast<struct epoll_event *>(&events)) == 0) &&
+        this->epollCount--);
+}
+
+bool RunTime::deleteClient(Client *socket) throw() {
+    std::list<Client *>::iterator         foundClient;
+    std::vector<AHttpRequest *>::iterator foundRequest;
+
+    // search for the client
+    foundClient =
+        std::find(this->clientPool.begin(), this->clientPool.end(), socket);
+    if (foundClient == this->clientPool.end()) {
+        Logger::log(LOG_ERROR, "Couldn't find the Client instance");
+        return false;
+    }
+    // search for the request
+    foundRequest = std::find(this->requestPool.begin(), this->requestPool.end(),
+                             (*foundClient)->request);
+    if (foundRequest == this->requestPool.end()) {
+        Logger::log(LOG_ERROR, "Couldn't find the request instance");
+    }
+
+    // remove from epoll
+    if (deleteFromEpoll(*foundClient) != true) {
+        Logger::log(LOG_WARNING, "Error on deleting Client from epoll");
+    }
+
+    // remove the request from the requestPool
+    this->requestPool.erase(foundRequest);
+    // erase the Client from the clientPool
+    this->clientPool.erase(foundClient);
+    // delete the client object.
+    // RAII is responsible for cleaning the Request Object associated
+    // with this CLient object
+    delete *foundClient;
+    return (true);
+}
+
+bool RunTime::checkEpoll(int checkType) const throw() {
+    struct epoll_event *events =
+        new (std::nothrow) struct epoll_event[this->epollCount];
+    int i = 0;
+
+    // debug
+    switch (checkType) {
+    case (NONBLOCKING_CHECK):
+        Logger::log(LOG_WARNING, "Non-blocking check on epoll");
+        break;
+    case (BLOCKING_CHECK):
+        Logger::log(LOG_WARNING, "Blocking check on epoll");
+        break;
+    }
+    // end debug
+    if (!events) {
+        Logger::log(LOG_ERROR, "checkEpoll allocation failed");
         return (false);
     }
-    Logger::log(LOG_INFO, "Passou do epoll_wait");
-    while (i < (std::vector<struct epoll_event>::size_type)loop_ceiling) {
+    const int loop_ceiling =
+        epoll_wait(this->_epollInstance, events, this->epollCount, checkType);
+    if (loop_ceiling < 0) {
+        delete[] events;
+        return (false);
+    }
+    while (i < loop_ceiling) {
         //              c++ moment KEKW
-        extractedData = reinterpret_cast<APollable *>(events[i].data.ptr);
-        extractedData->handlePoll(events[i].events);
+        reinterpret_cast<APollable *>(events[i].data.ptr)
+            ->handlePoll(events[i].events);
         i++;
     }
+    delete[] events;
     return (true);
 }
 
 bool RunTime::processRequests(void) {
-    std::vector<int>::size_type size = this->requestPool.size();
-    for (std::vector<int>::size_type i = 0; i < size; i++) {
-        std::cout << "request " << i << "sendo processada" << std::endl;
+    std::vector<AHttpRequest *>::size_type size = this->requestPool.size();
+    for (std::vector<AHttpRequest *>::size_type i = 0; i < size; i++) {
+        this->requestPool[i]->processRequest();
     }
     return (true);
 }
 
 // cleanup
+
 bool RunTime::closeListeners(void) throw() {
     std::stringstream                              ss;
     const std::vector<const Listener *>::size_type size =
@@ -183,6 +239,29 @@ bool RunTime::closeListeners(void) throw() {
     }
 
     return (true);
+}
+
+void RunTime::clearRequests(void) throw() {
+    std::vector<AHttpRequest *>::iterator       it;
+    const std::vector<AHttpRequest *>::iterator end = this->requestPool.end();
+
+    for (it = this->requestPool.begin(); it != end; ++it) {
+        delete *it;
+    }
+    // TODO: Tem certeza que o RunTime que tem que deletar cada request?
+    // TODO: Não, quem deve deletar as requests é cada Client
+    return;
+}
+
+bool RunTime::removeRequest(AHttpRequest *find) throw() {
+    std::vector<AHttpRequest *>::iterator found;
+
+    found = std::find(this->requestPool.begin(), this->requestPool.end(), find);
+    if (found == this->requestPool.end()) {
+        return false;
+    }
+    this->requestPool.erase(found);
+    return true;
 }
 
 #if 0

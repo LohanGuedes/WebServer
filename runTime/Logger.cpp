@@ -1,5 +1,4 @@
 #include "Logger.hpp"
-#include <ctime>
 
 Logger::Logger() {}
 Logger::~Logger() {}

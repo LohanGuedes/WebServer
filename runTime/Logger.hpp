@@ -1,6 +1,6 @@
-#pragma once
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
+#pragma once
 #include <ctime>
 #include <iostream>
 
@@ -23,4 +23,4 @@ class Logger {
     static void log(LOG_LEVEL, const std::string) throw();
 };
 
-#endif
+#endif // ! LOGGER_HPP

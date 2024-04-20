@@ -1,16 +1,17 @@
 #include "Listener.hpp"
 #include "Logger.hpp"
 #include "RunTime.hpp"
-#include <cstdlib>
 #include <sys/epoll.h>
 #include <vector>
 
 int main(void) {
     RunTime        *runTime = RunTime::getInstance(); // initialize RunTime
-    const Listener *listen = new Listener("127.0.0.1", "8080");
+    const Listener *listenv6 = new Listener("127.0.0.1", "8080");
+    const Listener *listenv4 = new Listener("0:0:0:0:0:0:0:1", "8081");
     int             checkType;
 
-    runTime->addListener(listen);
+    runTime->addListener(listenv4);
+    runTime->addListener(listenv6);
     runTime->createEpollInstance();
     runTime->startListeners();
     runTime->addListenersToEpoll();

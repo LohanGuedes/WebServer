@@ -1,16 +1,26 @@
-#pragma once
-#include <sys/epoll.h>
 #ifndef LISTENER_HPP
 #define LISTENER_HPP
+#pragma once
 
 #include "APollable.hpp"
+#include "Client.hpp"
+#include "Logger.hpp"
+#include "RunTime.hpp"
 #include "ServerConfig.hpp"
 #include <arpa/inet.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <exception>
+#include <list>
+#include <netdb.h>
 #include <netinet/in.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <vector>
+
+class RunTime;
 
 class Listener : public APollable {
   public:
@@ -26,14 +36,18 @@ class Listener : public APollable {
 
     // aux methods
     static unsigned long hashStr(std::string const &str);
+    bool resolveAddr(struct sockaddr_storage *ret) const throw();
 
-    // fields
+    // const fields
     const std::string   host;
     const int           port;
     const unsigned long hostPortHash;
 
+    // non_const fields
+    struct sockaddr_storage sockAddrInfo;
+
 #if 0
-		std::vector<ServerConfig>		configPool;
+		std::vector<ServerProps>		propsPool;
 #endif
 
     // Exceptions
