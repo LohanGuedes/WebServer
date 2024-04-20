@@ -195,9 +195,14 @@ bool RunTime::checkEpoll(int checkType) const throw() {
         break;
     }
     // end debug
+    if (!events) {
+        Logger::log(LOG_ERROR, "checkEpoll allocation failed");
+        return (false);
+    }
     const int loop_ceiling =
         epoll_wait(this->_epollInstance, events, this->epollCount, checkType);
     if (loop_ceiling < 0) {
+        delete[] events;
         return (false);
     }
     while (i < loop_ceiling) {
@@ -206,6 +211,7 @@ bool RunTime::checkEpoll(int checkType) const throw() {
             ->handlePoll(events[i].events);
         i++;
     }
+    delete[] events;
     return (true);
 }
 
