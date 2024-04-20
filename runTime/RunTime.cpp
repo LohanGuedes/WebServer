@@ -181,8 +181,9 @@ bool RunTime::deleteClient(Client *socket) throw() {
 }
 
 bool RunTime::checkEpoll(int checkType) const throw() {
-    std::vector<struct epoll_event>            events(this->epollCount);
-    std::vector<struct epoll_event>::size_type i = 0;
+    struct epoll_event *events =
+        new (std::nothrow) struct epoll_event[this->epollCount];
+    int i = 0;
 
     // debug
     switch (checkType) {
@@ -194,12 +195,12 @@ bool RunTime::checkEpoll(int checkType) const throw() {
         break;
     }
     // end debug
-    const int loop_ceiling = epoll_wait(this->_epollInstance, &events.at(0),
-                                        this->epollCount, checkType);
+    const int loop_ceiling =
+        epoll_wait(this->_epollInstance, events, this->epollCount, checkType);
     if (loop_ceiling < 0) {
         return (false);
     }
-    while (i < (std::vector<struct epoll_event>::size_type)loop_ceiling) {
+    while (i < loop_ceiling) {
         //              c++ moment KEKW
         reinterpret_cast<APollable *>(events[i].data.ptr)
             ->handlePoll(events[i].events);
