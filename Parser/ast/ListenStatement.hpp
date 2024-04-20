@@ -21,7 +21,8 @@
  */
 class ListenStatement : public IStatement {
   public:
-    Token      token;
+    Token token;
+    // TODO: Split host_port
     Identifier host_port; // <URL>:<PORT>
     // Implementation for IStatement & INode
     virtual std::string token_literal();
