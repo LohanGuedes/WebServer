@@ -4,7 +4,7 @@
 
 class MultipartRequest : public AHttpRequest {
   public:
-    MultipartRequest(Client const *const clientInstance);
+    MultipartRequest(Client *const clientInstance);
     ~MultipartRequest(void);
     virtual void processRequest(void) throw();
 };

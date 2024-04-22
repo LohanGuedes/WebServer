@@ -149,6 +149,7 @@ bool RunTime::deleteFromEpoll(const APollable *newInstance) throw() {
 bool RunTime::deleteClient(Client *socket) throw() {
     std::list<Client *>::iterator         foundClient;
     std::vector<AHttpRequest *>::iterator foundRequest;
+    Client                               *clientToDelete;
 
     // search for the client
     foundClient =
@@ -169,6 +170,7 @@ bool RunTime::deleteClient(Client *socket) throw() {
         Logger::log(LOG_WARNING, "Error on deleting Client from epoll");
     }
 
+    clientToDelete = *foundClient;
     // remove the request from the requestPool
     this->requestPool.erase(foundRequest);
     // erase the Client from the clientPool
@@ -176,7 +178,7 @@ bool RunTime::deleteClient(Client *socket) throw() {
     // delete the client object.
     // RAII is responsible for cleaning the Request Object associated
     // with this CLient object
-    delete *foundClient;
+    delete clientToDelete;
     return (true);
 }
 

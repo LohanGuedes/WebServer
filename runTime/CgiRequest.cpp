@@ -1,7 +1,7 @@
 #include "CgiRequest.hpp"
 #include "Logger.hpp"
 
-CgiRequest::CgiRequest(Client const *const clientInstance)
+CgiRequest::CgiRequest(Client *const clientInstance)
     : AHttpRequest(clientInstance) {}
 
 CgiRequest::~CgiRequest(void) {}

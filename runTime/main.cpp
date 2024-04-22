@@ -5,13 +5,11 @@
 #include <vector>
 
 int main(void) {
-    RunTime        *runTime = RunTime::getInstance(); // initialize RunTime
-    const Listener *listenv6 = new Listener("127.0.0.1", "8080");
-    const Listener *listenv4 = new Listener("0:0:0:0:0:0:0:1", "8081");
-    int             checkType;
+    RunTime *runTime = RunTime::getInstance(); // initialize RunTime
+    int      checkType;
 
-    runTime->addListener(listenv4);
-    runTime->addListener(listenv6);
+    runTime->addListener("127.0.0.1", "8080");
+    runTime->addListener("0:0:0:0:0:0:0:1", "8081");
     runTime->createEpollInstance();
     runTime->startListeners();
     runTime->addListenersToEpoll();

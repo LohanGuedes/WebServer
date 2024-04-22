@@ -3,6 +3,7 @@
 #include "AHttpRequest.hpp"
 #include "APollable.hpp"
 #include "CgiRequest.hpp"
+#include "IResponseNotifier.hpp"
 #include "Logger.hpp"
 #include "MultipartRequest.hpp"
 #include "RegularRequest.hpp"
@@ -12,16 +13,21 @@
 #include <sys/socket.h>
 
 class RunTime;
+class HttpResponse;
 
-class Client : public APollable {
+class Client : public APollable, public IResponseNotifier {
   public:
     Client(int const fd);
     virtual ~Client(void);
     virtual void               handlePoll(epoll_event_bitflag const bitflag);
-    virtual struct epoll_event getEpollEventStruct(void) const throw();
     AHttpRequest              *parseHeader(void);
+    virtual int                notifyResponseReady(HttpResponse *res);
+    virtual int                sendResponse(void);
+    virtual struct epoll_event getEpollEventStruct(void) const throw();
 
     AHttpRequest const *request;
+    HttpResponse       *response;
+    bool                pollout_ready;
 #if 0
 	std::vector<ServerProps const *> serverProps;
 #endif

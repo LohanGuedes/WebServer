@@ -1,19 +1,28 @@
 #include "Client.hpp"
 #include "AHttpRequest.hpp"
 #include "Logger.hpp"
+#include "RegularRequest.hpp"
 #include "RunTime.hpp"
+#include <cstddef>
 #include <cstdlib>
 #include <sys/epoll.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 Client::Client(int const fd)
-    : APollable(this->getEpollEventStruct()), request(NULL) {
+    : APollable(this->getEpollEventStruct()), request(NULL), response(NULL),
+      pollout_ready(false) {
     this->_fd = fd;
 }
 
 Client::~Client(void) {
-    if (this->request) {
+    if (this->request != NULL) {
         delete this->request;
     }
+    if (this->_fd != -1) {
+        close(this->_fd);
+    }
+    return;
 }
 
 void Client::handlePoll(epoll_event_bitflag const bitflag) {
@@ -27,7 +36,7 @@ void Client::handlePoll(epoll_event_bitflag const bitflag) {
         // remove the request from the request requestPool -> rt
         // remove the client from the epoll instance -> rt
         rt = RunTime::getInstance();
-        rt->deleteClient(this);
+        (void)rt->deleteClient(this);
         return;
     }
     if (bitflag & EPOLLIN) {
@@ -52,7 +61,11 @@ void Client::handlePoll(epoll_event_bitflag const bitflag) {
         return;
     }
     if (bitflag & EPOLLOUT) {
-        Logger::log(LOG_WARNING, "Todo pollout on Client");
+        if (this->notifyResponseReady(NULL) == 0) {
+            // TODO: Fazer o cleanup do senrResponse aqui?
+            this->sendResponse();
+        }
+        return;
     }
     return;
 }
@@ -76,6 +89,28 @@ AHttpRequest *Client::parseHeader(void) {
         break;
     }
     return (req);
+}
+
+int Client::sendResponse(void) {
+    // TODO implement this method
+    return (0);
+}
+
+int Client::notifyResponseReady(HttpResponse *res) {
+    (void)res;
+
+    this->pollout_ready = true;
+    if (this->response == NULL) {
+        return (1);
+    }
+    this->sendResponse();
+    // TODO: cleanup?
+    RunTime *const rt = RunTime::getInstance();
+    if (!rt) {
+        // TODO: Implement analogous to panic!
+    }
+    rt->deleteClient(this);
+    return (0);
 }
 
 struct epoll_event Client::getEpollEventStruct(void) const throw() {

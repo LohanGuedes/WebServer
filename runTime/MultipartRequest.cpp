@@ -1,7 +1,7 @@
 #include "MultipartRequest.hpp"
 #include "Logger.hpp"
 
-MultipartRequest::MultipartRequest(Client const *const clientInstance)
+MultipartRequest::MultipartRequest(Client *const clientInstance)
     : AHttpRequest(clientInstance) {}
 
 MultipartRequest::~MultipartRequest(void) {}
