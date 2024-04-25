@@ -1,10 +1,10 @@
 #pragma once
-#include "IAst.hpp"
-#include "Identifier.hpp"
 #ifndef LISTEN_STATEMENT
 
 #include "../tokenizer/Token.hpp"
 #include "Ast.hpp"
+#include "IAst.hpp"
+#include "Identifier.hpp"
 #include <string>
 
 /* ListenStatement references the Listen rule inside a server{}
