@@ -43,7 +43,6 @@ token_type  Token::get_type() { return this->_type; }
 
 void Token::set_type(token_type t_type) { this->_type = t_type; }
 
-// TODO: NEED UPDATE! Accept numbers and some special chars such as -> :
 bool Token::is_letter(char ch) {
     return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_' ||
            ch == '/' || ch == ':' || (ch >= '0' && ch <= '9');

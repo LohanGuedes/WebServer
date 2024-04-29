@@ -44,13 +44,12 @@ void Parser::next_token() {
 
 IStatement *Parser::parse_statement() {
     switch (this->current_token->get_type()) {
-    /* case LISTEN: */
-    /*     return this->parse_listen_statement(); */
     case SERVER:
         return this->parse_server_statement();
     default:
         Logger::log(LOG_ERROR,
                     "unexpected token during outer server-block parsing.");
+        delete this;
         return NULL;
     }
     return NULL;
@@ -193,12 +192,9 @@ void Parser::parse_error_page_statement(
 }
 
 void Parser::parse_inside_server_block_statment(ServerStatement *stmt) {
-    // NOTE: I know there is a warning. but IDGAF.
     switch (this->current_token->get_type()) {
     case LISTEN:
-        // TODO: PLEASE THINK ABOUT A WAY TO MAKE THIS WORK
-        // PLEASEEEEEEEEEEEEEEEEE this is a problem considering the state during
-        // the creation... go read the runtime api bitch.
+        stmt->listeners.push_back(this->parse_listen_statement());
         return;
     case SERVER_NAME:
         stmt->server_name = this->parse_server_name_statement();
@@ -209,18 +205,20 @@ void Parser::parse_inside_server_block_statment(ServerStatement *stmt) {
         stmt->client_max_body_size =
             this->parse_client_max_body_size_statement();
         return;
-    /* case CLIENT_MAX_HEADER_SIZE: */
-    /*     stmt->client_max_header_size = */
-    /*         this->parse_client_max_header_size_statement(); */
-    /*     return; */
+    // case CLIENT_MAX_HEADER_SIZE:
+    // TODO: Implement client_max_header_size
+    //     stmt->client_max_header_size =
+    //         this->parse_client_max_header_size_statement();
+    //     return;
     case ERROR_PAGE:
-        // NOTE: I hate that is not explicit that this will change the state of
-        // the hasmap. but its the way I made it work, and I am happy :)
         this->parse_error_page_statement(stmt->error_page_statements);
         return;
     case LOCATION:
-        // Think about it...
+        stmt->locationStatements.push_back(this->parse_location_statement());
         return;
+    default:
+        this->peek_error(ILLEGAL);
+        delete this;
     }
 }
 
@@ -236,16 +234,14 @@ ServerStatement *Parser::parse_server_statement() {
         return NULL;
     }
 
-    // While !char('}')
-    /*
-     * server {
-     *    root ./
-     *    location asldkfjadk {
-     *    }
-     * }
-     */
     while (!this->current_token_is(RBRACKET)) {
         this->parse_inside_server_block_statment(stmt);
+    }
+
+    if (!this->expect_peek(RBRACKET)) {
+        delete stmt;
+        delete this;
+        return NULL;
     }
 
     return stmt;
@@ -271,8 +267,11 @@ bool Parser::parse_autoindex_statement() {
     if (!this->expect_peek(IDENTIFIER)) {
         return false;
     }
-    return_location = this->current_token->get_literal() == "on" ||
-                      this->current_token->get_literal() == "true";
+
+    if (!(this->current_token->get_literal() == "on" ||
+          this->current_token->get_literal() == "true")) {
+        this->peek_error(ILLEGAL);
+    }
 
     return this->expect_peek(SEMICOLON);
 }
@@ -290,7 +289,7 @@ void Parser::parse_allow_methods_statement(std::vector<std::string> &methods) {
 
             methods.push_back(this->current_token->get_literal());
         } else {
-            this->peek_error(this->current_token->get_type());
+            this->peek_error(T_EOF);
         }
         this->next_token();
     }
@@ -298,21 +297,18 @@ void Parser::parse_allow_methods_statement(std::vector<std::string> &methods) {
     return;
 }
 
-// WARNING: May have a off by one error in the state of the parser. maybe we
-// need to CONSUME THE SEMICOLON
 void Parser::parse_cgi_extensions_statment(std::vector<std::string> &exts) {
     this->next_token();
     while (!this->current_token_is(SEMICOLON)) {
         if (this->current_token_is(IDENTIFIER)) {
             exts.push_back(this->current_token->get_literal());
         } else {
-            // TODO: Create a better function for this...
-            this->peek_error(this->current_token->get_type());
+            // REVIEW:
+            this->peek_error(IDENTIFIER);
         }
         this->next_token();
     }
-    // WARNING: is this the right way? this->next_token(); -> Consume the ; here
-    // or later on? Idnk
+    this->expect_peek(SEMICOLON);
     return;
 }
 
@@ -329,6 +325,9 @@ void Parser::parse_inside_location_block_statement(LocationStatement *stmt) {
         break;
     case CGI_EXTENSION:
         break;
+    default:
+        this->peek_error(ILLEGAL);
+        delete this;
     }
 }
 
@@ -354,6 +353,12 @@ LocationStatement *Parser::parse_location_statement() {
     // possible inside the current location statements.
     while (!this->current_token_is(RBRACKET)) {
         this->parse_inside_location_block_statement(stmt);
+    }
+
+    // check this carefully.
+    if (!this->expect_peek(RBRACKET)) {
+        delete stmt;
+        delete this;
     }
 
     return stmt;

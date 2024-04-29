@@ -17,8 +17,8 @@ class ServerStatement : public IStatement {
     Identifier ident;
 
     std::string                            server_name;
-    std::vector<const LocationStatement *> LocationStatements;
-    std::vector<const ListenStatement *>   Listeners;
+    std::vector<const LocationStatement *> locationStatements;
+    std::vector<const ListenStatement *>   listeners;
     std::string                            root;
     std::string                            client_max_body_size;
     std::string                            client_max_header_size;

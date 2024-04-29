@@ -19,6 +19,7 @@
 class Parser {
   public:
     Parser(Lexer *);
+    ~Parser();
     Parser(std::string);
     ServerConfig            *ParseConfig();
     void                     check_parser_errors();
