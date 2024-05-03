@@ -1,5 +1,6 @@
 #pragma once
 #ifndef SERVERSTATEMENT
+#define SERVERSTATEMENT
 
 #include "IAst.hpp"
 #include "Identifier.hpp"
@@ -10,9 +11,10 @@
 #include <string>
 #include <vector>
 
-class ServerStatement : public IStatement {
+class ServerStatement {
   public:
     ServerStatement(void);
+    ~ServerStatement(void);
     Token      token;
     Identifier ident;
 
@@ -23,12 +25,6 @@ class ServerStatement : public IStatement {
     std::string                            client_max_body_size;
     std::string                            client_max_header_size;
     std::map<std::string, std::string>     error_page_statements;
-
-    // Implementation for IStatement & INode |> Prolly not necessary
-    virtual std::string token_literal();
-    void                statement_node();
-
-  private:
 };
 
 #endif // !SERVERSTATEMENT

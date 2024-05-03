@@ -1,11 +1,15 @@
 #include "./Parser.hpp"
+#include "ast/Ast.hpp"
 #include "ast/IAst.hpp"
 #include "ast/Identifier.hpp"
 #include "ast/ListenStatement.hpp"
 #include "ast/LocationStatement.hpp"
 #include "ast/ServerStatement.hpp"
+#include "tokenizer/Lexer.hpp"
 #include "tokenizer/Token.hpp"
+#include <condition_variable>
 #include <cstdlib>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -18,18 +22,33 @@ Parser::Parser(Lexer *lexer) {
     this->next_token();
 }
 
+Parser::~Parser() {
+    if (this->current_token != NULL) {
+        delete this->current_token;
+    }
+}
+
 Parser::Parser(std::string file_path) {
-    // TODO: Implement this using open and whynot
-    return; // :)
+    std::ifstream file(file_path.c_str());
+
+    if (!file.is_open()) {
+        Logger::log(LOG_ERROR, "Error when opening config path... aborting");
+        std::exit(1);
+    }
+    std::ostringstream buffer;
+
+    buffer << file.rdbuf();
+
+    this->lexer = new Lexer(buffer.str());
+
+    this->next_token();
+    this->next_token();
 }
 
 ServerConfig *Parser::ParseConfig() {
     ServerConfig *serverConf = new ServerConfig();
     while (this->current_token->get_type() != T_EOF) {
-        IStatement *stmt = this->parse_statement();
-        if (stmt != NULL) {
-            serverConf->statements.push_back(stmt);
-        }
+        serverConf->statements.push_back(this->parse_statement());
         this->next_token();
     }
 
@@ -37,12 +56,16 @@ ServerConfig *Parser::ParseConfig() {
 }
 
 void Parser::next_token() {
+    /* if (this->current_token) { */
+    /*     delete this->current_token; */
+    /* } */
     this->current_token = this->peek_token;
+
     this->peek_token = this->lexer->next_token();
     return;
 }
 
-IStatement *Parser::parse_statement() {
+ServerStatement *Parser::parse_statement() {
     switch (this->current_token->get_type()) {
     case SERVER:
         return this->parse_server_statement();
@@ -218,7 +241,6 @@ void Parser::parse_inside_server_block_statment(ServerStatement *stmt) {
         return;
     default:
         this->peek_error(ILLEGAL);
-        delete this;
     }
 }
 
@@ -239,8 +261,6 @@ ServerStatement *Parser::parse_server_statement() {
     }
 
     if (!this->expect_peek(RBRACKET)) {
-        delete stmt;
-        delete this;
         return NULL;
     }
 
@@ -357,8 +377,8 @@ LocationStatement *Parser::parse_location_statement() {
 
     // check this carefully.
     if (!this->expect_peek(RBRACKET)) {
-        delete stmt;
-        delete this;
+        /* delete stmt; */
+        /* delete this; */
     }
 
     return stmt;

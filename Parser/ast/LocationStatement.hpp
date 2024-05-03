@@ -5,9 +5,10 @@
 #include "Identifier.hpp"
 #include <vector>
 
-class LocationStatement : public IStatement {
+class LocationStatement {
   public:
     LocationStatement(void);
+    ~LocationStatement(void);
     Token      token;
     Identifier path;
 
@@ -17,12 +18,6 @@ class LocationStatement : public IStatement {
     std::vector<std::string> cgi_extensions;
     std::string              return_location;
     bool                     autoindex;
-
-    // Implementation for IStatement & INode
-    virtual std::string token_literal();
-    void                statement_node();
-
-  private:
 };
 
 #endif // !LOCATIONSTATMENT

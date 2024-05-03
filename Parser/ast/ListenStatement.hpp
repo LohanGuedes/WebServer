@@ -1,10 +1,10 @@
 #pragma once
+#include "IAst.hpp"
+#include "Identifier.hpp"
 #ifndef LISTEN_STATEMENT
 
 #include "../tokenizer/Token.hpp"
 #include "Ast.hpp"
-#include "IAst.hpp"
-#include "Identifier.hpp"
 #include <string>
 
 /* ListenStatement references the Listen rule inside a server{}
@@ -19,10 +19,9 @@
  *  .port  = std::string("<PORT>")
  * }
  */
-class ListenStatement : public IStatement {
+class ListenStatement {
   public:
-    Token token;
-    // TODO: Split host_port
+    Token      token;
     Identifier host_port; // <URL>:<PORT>
     // Implementation for IStatement & INode
     virtual std::string token_literal();

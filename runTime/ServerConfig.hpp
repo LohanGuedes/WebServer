@@ -1,20 +1,20 @@
 #ifndef SERVERCONFIG_HPP
-# define SERVERCONFIG_HPP
-# include <iostream>
+#define SERVERCONFIG_HPP
+#include <iostream>
 #include <string>
 
-class ServerConfig
-{
-	public:
-		ServerConfig(void);
-		ServerConfig(ServerConfig const &cpy);
-		~ServerConfig(void);
-		ServerConfig&	operator=(ServerConfig const &rhs);
+class ServerConfig {
+  public:
+    ServerConfig(void);
+    ServerConfig(ServerConfig const &cpy);
+    ~ServerConfig(void);
+    ServerConfig &operator=(ServerConfig const &rhs);
 
-		std::string		hostPort; // e.g: "localhost:4040"
-		std::string		serverName;
-	private:
-		int	_fd;
+    std::string hostPort; // e.g: "localhost:4040"
+    std::string serverName;
+
+  private:
+    int _fd;
 };
 
 #endif

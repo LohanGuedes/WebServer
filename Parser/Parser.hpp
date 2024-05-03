@@ -37,7 +37,7 @@ class Parser {
 
     void next_token();
     // TOP LEVEL
-    IStatement      *parse_statement();
+    ServerStatement *parse_statement();
     ServerStatement *parse_server_statement();
     void             parse_inside_server_block_statment(ServerStatement *);
 
